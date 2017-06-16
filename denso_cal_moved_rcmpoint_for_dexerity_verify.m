@@ -38,64 +38,54 @@ p_0_o6=p_0_o5+d6*R_0_6*z_axis;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % RCM point
-        s_rcm=tube_para(1); % RCMµã»¡³¤
-        s_tube_fir=tube_para(2); 
-        s_tube_sec=tube_para(3);
-        tube_theta_fir=tube_para(4);
-        tube_theta_sec=tube_para(5);
-        tube_r_fir=s_tube_fir/tube_theta_fir; % µÚÒ»¶ÎÔ²»¡°ë¾¶
-        tube_r_sec=s_tube_sec/tube_theta_sec; % µÚ¶ş¶ÎÔ²»¡°ë¾¶
-        if s_rcm>=s_tube_fir+s_tube_sec
-            s_rcm=s_tube_fir+s_tube_sec;
-        elseif s_rcm<=0
-            s_rcm=0;
-        end
-        if s_rcm<s_tube_fir && s_rcm>=0
-                p_6_rcmafter=R_0_6'*(p_rcm_origin-p_0_o6)-180*z_axis;
-                if tube_theta_fir==0
-                    s_rcm_after_fir=p_6_rcmafter(3);
-                else
-                    s_rcm_after_fir=asin(p_6_rcmafter(3)/tube_r_fir)*tube_r_fir;
-                end
-                if s_rcm_after_fir>s_tube_fir
-                    if tube_theta_fir==0
-                        p_cir1_cir1rcm=(rotx(-tube_theta_fir))'*(p_6_rcmafter-[0;0;s_tube_fir]);
-                    else
-                    p_cir1_cir1rcm=(rotx(-tube_theta_fir))'*(p_6_rcmafter-[0;tube_r_fir-cos(tube_theta_fir)*tube_r_fir;sin(tube_theta_fir)*tube_r_fir]);
-                    end
-                    if tube_theta_sec==0
-                        s_rcm_after_sec=p_cir1_cir1rcm(3);
-                    else
-                        s_rcm_after_sec=asin(p_cir1_cir1rcm(3)/tube_r_sec)*tube_r_sec;
-                    end
-                    s_rcm_after=s_tube_fir+s_rcm_after_sec;
-                else
-                    s_rcm_after=s_rcm_after_fir;
-                end
-        elseif s_rcm>=s_tube_fir && s_rcm<=s_tube_fir+s_tube_sec
-                p_6_rcmafter=R_0_6'*(p_rcm_origin-p_0_o6)-180*z_axis;
-                if tube_theta_fir==0
-                    s_rcm_after_fir=p_6_rcmafter(3);
-                else
-                    s_rcm_after_fir=asin(p_6_rcmafter(3)/tube_r_fir)*tube_r_fir;
-                end
-                if s_rcm_after_fir>s_tube_fir
-                    if tube_theta_fir==0
-                        p_cir1_cir1rcm=(rotx(-tube_theta_fir))'*(p_6_rcmafter-[0;0;s_tube_fir]);
-                    else
-                    p_cir1_cir1rcm=(rotx(-tube_theta_fir))'*(p_6_rcmafter-[0;tube_r_fir-cos(tube_theta_fir)*tube_r_fir;sin(tube_theta_fir)*tube_r_fir]);
-                    end
-                    if tube_theta_sec==0
-                        s_rcm_after_sec=p_cir1_cir1rcm(3);
-                    else
-                        s_rcm_after_sec=asin(p_cir1_cir1rcm(3)/tube_r_sec)*tube_r_sec;
-                    end
-                    s_rcm_after=s_tube_fir+s_rcm_after_sec;
-                else
-                    s_rcm_after=s_rcm_after_fir;
-                end
-        end
-        tube_para=[s_rcm_after,s_tube_fir,s_tube_sec,tube_theta_fir,tube_theta_sec];
+npts=1000;
+s_rcm=tube_para(1); % RCMµã»¡³¤
+s_tube_fir=tube_para(2);
+s_tube_sec=tube_para(3);
+tube_theta_fir=tube_para(4);
+tube_theta_sec=tube_para(5);
+tube_r_fir=s_tube_fir/tube_theta_fir; % µÚÒ»¶ÎÔ²»¡°ë¾¶
+tube_r_sec=s_tube_sec/tube_theta_sec; % µÚ¶ş¶ÎÔ²»¡°ë¾¶
+lintube_theta_fir=linspace(0,tube_theta_fir,npts/2);
+lintube_theta_sec=linspace(0,tube_theta_sec,npts/2);
+if tube_theta_fir==0
+    p_6_t2_fir=180*z_axis*ones(1,npts/2)+[zeros(1,npts/2);zeros(1,npts/2);linspace(0,s_tube_fir,npts/2)];
+    p_6_t2_sec=p_6_t2_fir(:,npts/2)*ones(1,npts/2)+rotx(-tube_theta_fir)*[zeros(1,npts/2);tube_r_sec-cos(lintube_theta_sec)*tube_r_sec;sin(lintube_theta_sec)*tube_r_sec];
+elseif tube_theta_sec==0
+    p_6_t2_fir=180*z_axis*ones(1,npts/2)+[zeros(1,npts/2);tube_r_fir-cos(lintube_theta_fir)*tube_r_fir;sin(lintube_theta_fir)*tube_r_fir];
+    p_6_t2_sec=p_6_t2_fir(:,npts/2)*ones(1,npts/2)+rotx(-tube_theta_fir)*[zeros(1,npts/2);zeros(1,npts/2);linspace(0,s_tube_sec,npts/2)];
+else
+    p_6_t2_fir=180*z_axis*ones(1,npts/2)+[zeros(1,npts/2);tube_r_fir-cos(lintube_theta_fir)*tube_r_fir;sin(lintube_theta_fir)*tube_r_fir];
+    p_6_t2_sec=p_6_t2_fir(:,npts/2)*ones(1,npts/2)+rotx(-tube_theta_fir)*[zeros(1,npts/2);tube_r_sec-cos(lintube_theta_sec)*tube_r_sec;sin(lintube_theta_sec)*tube_r_sec];
+end
+p_6_t2=[p_6_t2_fir,p_6_t2_sec];
+p_6_t_rcm=p_6_t2-(R_0_6'*(p_rcm_origin-p_0_o6))*ones(1,npts);
+for i=1:npts
+    d_6_t_rcm(i)=norm(p_6_t_rcm(:,i));
+end
+[min_v,min_i]=min(d_6_t_rcm);
+p_6_rcmafter=p_6_t2(:,min_i)-180*z_axis;
+if min_i<=npts/2
+    if tube_theta_fir==0
+        s_rcm_after_fir=p_6_rcmafter(3);
+    else
+        s_rcm_after_fir=asin(p_6_rcmafter(3)/tube_r_fir)*tube_r_fir;
+    end
+    s_rcm_after=s_rcm_after_fir;
+else
+    if tube_theta_fir==0
+        p_cir1_cir1rcm=(rotx(-tube_theta_fir))'*(p_6_rcmafter-[0;0;s_tube_fir]);
+    else
+        p_cir1_cir1rcm=(rotx(-tube_theta_fir))'*(p_6_rcmafter-[0;tube_r_fir-cos(tube_theta_fir)*tube_r_fir;sin(tube_theta_fir)*tube_r_fir]);
+    end
+    if tube_theta_sec==0
+        s_rcm_after_sec=p_cir1_cir1rcm(3);
+    else
+        s_rcm_after_sec=asin(p_cir1_cir1rcm(3)/tube_r_sec)*tube_r_sec;
+    end
+    s_rcm_after=s_tube_fir+s_rcm_after_sec;
+end
+tube_para=[s_rcm_after,s_tube_fir,s_tube_sec,tube_theta_fir,tube_theta_sec];
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

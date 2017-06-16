@@ -287,7 +287,7 @@ beta=50/180*pi;alpha=140/180*pi;gamma=-50/180*pi;
                         % % % % % % % % % % % % % % % % % % % % % % % % %
                         
                         % cal new RCM position parameter on tube
-                        tube_para1=denso_cal_moved_rcmpoint_for_dexerity_verify(mov1_p_o0,q_c1,tube_para1,p_rcm1);
+                        tube_para1=denso_cal_moved_rcmpoint_for_dexerity_verify(mov1_p_o0,q_c1,tube_para1,p_rcm_origin1);
                         
                         [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                         
@@ -380,7 +380,6 @@ title('record norm tube diff')
 % writeVideo(vobj,movie_mov);
 % close(vobj);
 
-%1231231231
 
 
 
