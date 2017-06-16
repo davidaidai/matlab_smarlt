@@ -1,3 +1,0 @@
-TEST 1 origin text
-
-test 2 add content again
