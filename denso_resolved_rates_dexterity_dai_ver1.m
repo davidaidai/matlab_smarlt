@@ -33,8 +33,8 @@ tube_para1_origin=tube_para1;
 p_rcm_origin1=p_0_rcm;
 
 % set simulation parameters
-eps=0.1;%paper中说是0.02
-lamda=0.05;%paper中说是0.02
+eps=0.03;%paper中说是0.02
+lamda=0.03;%paper中说是0.02
 d_t=0.002;
 error_p_desire=0.2;
 error_r_desire=0.03;
@@ -77,7 +77,7 @@ target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','draw');
 %%%%%%%
 
 % for vertex_m=1:(size(p_cube,2))
-vertex_m=4;
+vertex_m=3;
     i_record=0;
     i_singular=0;
     i_RCM_violate=0;
@@ -92,7 +92,10 @@ vertex_m=4;
 %                 if gamma==2*pi
 %                     break;
 %                 end
-beta=50/180*pi;alpha=140/180*pi;gamma=-50/180*pi;
+% beta=0;alpha=90/180*pi;gamma=0;
+% beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
+beta=-50/180*pi;alpha=150/180*pi;gamma=-10/180*pi;
+% beta=50/180*pi;alpha=140/180*pi;gamma=-50/180*pi;
                 i_ran=0;
                 targetreach_sign=0;
                 randtarget_sign=0;
@@ -116,9 +119,9 @@ beta=50/180*pi;alpha=140/180*pi;gamma=-50/180*pi;
                         p_t1=p_norm_t1;
                         R_t1=R_norm_t1;
                         
-%                         %%%%%%% draw sentences
-%                         target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
-%                         %%%%%%%
+                        %%%%%%% draw sentences
+                        target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
+                        %%%%%%%
                         
                     elseif randtarget_sign==1
                         sphere_rand_alpha=(rand*2-1)*pi;
@@ -128,9 +131,9 @@ beta=50/180*pi;alpha=140/180*pi;gamma=-50/180*pi;
                         R_t1=rotx((rand*2-1)*pi)*roty((rand*2-1)*pi)*rotz((rand*2-1)*pi);
                         i_ran=i_ran+1;
                         
-%                         %%%%%%% draw sentences
-%                         target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
-%                         %%%%%%%
+                        %%%%%%% draw sentences
+                        target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
+                        %%%%%%%
                         
                     end
                     while j<steplimit
@@ -181,32 +184,13 @@ beta=50/180*pi;alpha=140/180*pi;gamma=-50/180*pi;
                         record_tube_para1(:,i_record)=tube_para1';
                         record_p_t1(:,i_record)=p_t1;
                         record_R_t1(:,:,i_record)=R_t1;
-%                         if Sdenso(6,6)<= eps % paper中是0.02
-%                             if Srt(6,6)<=eps
-%                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+lamda*eye(6));
-%                             display('denso 1 singularity');
-%                             badcount=badcount+1;
-%                             i_singular=i_singular+1;
-%                             if mod(i_singular,100)==0
-%                             %%%%%%% draw sentences
-%                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
-%                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
-%                             %%%%%%%
-%                             saveas(1,['J_rt singular',num2str(i_singular),'.jpg']);
-%                             end
-%                             record_Srcm(:,:,i_singular)=Srcm;
-%                             record_Sdenso(:,:,i_singular)=Sdenso;
-%                             record_Sgrip(:,:,i_singular)=Sgrip;
-%                             record_Srt(:,:,i_singular)=Srt;
-%                             record_q_c1(:,i_singular)=q_c1;
-%                             record_tube_para1(:,i_singular)=tube_para1';
-%                             record_p_t1(:,i_singular)=p_t1;
-%                             record_R_t1(:,:,i_singular)=R_t1;
-                            
-                            
-%                         else
+                        if Srt(6,6)<=eps
+                            J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+lamda*eye(6));
+                            display('denso 1 singularity');
+                            badcount=badcount+1;
+                        else
                             J_rt_plus1=pinv(J_rt1);
-%                         end
+                        end
                         
                         J_total_plus1=(eye(8)-pinv(J_rcm_p1)*J_rcm_p1)*J_rt_plus1;
                         q_dot1=J_total_plus1*x_dot1;
@@ -351,10 +335,10 @@ figure
 plot_Srt(1:i_record)=record_Srt(6,6,:);
 plot(1:i_record,plot_Srt)
 title('record Srt')
-figure
-plot_Srcm(1:i_record)=record_Srcm(2,2,:);
-plot(1:i_record,plot_Srcm)
-title('record Srcm')
+% figure
+% plot_Srcm(1:i_record)=record_Srcm(2,2,:);
+% plot(1:i_record,plot_Srcm)
+% title('record Srcm')
 figure
 plot(1:i_record,record_q_dot1(1,:),'r')
 hold on
