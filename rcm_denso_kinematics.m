@@ -39,7 +39,14 @@ tube_theta_fir=tube_para(4); % 第一段圆弧圆心角
 tube_theta_sec=tube_para(5); % 第二段圆弧圆心角
 R_6_tube=rotx(-tube_theta_fir)*rotx(-tube_theta_sec); % tube末端在6坐标系中的指向
 R_0_tube=R_0_6*R_6_tube;
-p_6_o6tube=180*z_axis+[0;s_tube_fir/tube_theta_fir-cos(tube_theta_fir)*s_tube_fir/tube_theta_fir;sin(tube_theta_fir)*s_tube_fir/tube_theta_fir]+rotx(-tube_theta_fir)*[0;s_tube_sec/tube_theta_sec-cos(tube_theta_sec)*s_tube_sec/tube_theta_sec;sin(tube_theta_sec)*s_tube_sec/tube_theta_sec];
+if tube_theta_fir==0
+    p_6_o6t2=180*z_axis+[0;0;s_tube_fir]+rotx(-tube_theta_fir)*[0;s_tube_sec/tube_theta_sec-cos(tube_theta_sec)*s_tube_sec/tube_theta_sec;sin(tube_theta_sec)*s_tube_sec/tube_theta_sec];
+elseif tube_theta_sec==0
+    p_6_o6t2=180*z_axis+[0;s_tube_fir/tube_theta_fir-cos(tube_theta_fir)*s_tube_fir/tube_theta_fir;sin(tube_theta_fir)*s_tube_fir/tube_theta_fir]+rotx(-tube_theta_fir)*[0;0;s_tube_sec];
+else
+    p_6_o6t2=180*z_axis+[0;s_tube_fir/tube_theta_fir-cos(tube_theta_fir)*s_tube_fir/tube_theta_fir;sin(tube_theta_fir)*s_tube_fir/tube_theta_fir]+rotx(-tube_theta_fir)*[0;s_tube_sec/tube_theta_sec-cos(tube_theta_sec)*s_tube_sec/tube_theta_sec;sin(tube_theta_sec)*s_tube_sec/tube_theta_sec];
+end
+p_6_o6tube=p_6_o6t2;
 p_0_tube=p_0_o6+R_0_6*p_6_o6tube;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%

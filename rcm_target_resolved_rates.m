@@ -4,8 +4,8 @@ p_t1=p_0_rcm;
 R_t1=R_0_rcm;
 
 % set simulation parameters
-eps=0.07;
-lamda=4;
+eps=0.02;
+lamda=0.02;
 d_t=0.002;
 error_p_desire=0.01;
 error_r_desire=0.03;
