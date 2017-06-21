@@ -286,7 +286,7 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
 %                             rr3=acos((p_rcm_origin1-p_rcm1)'*v_rcm_p1/norm((p_rcm1-p_rcm_origin1))/norm(v_rcm_p1));
 %                         end
                         
-                        record_v_pp_direc(i_record)=acos((p_rcm_origin1-p_rcm1)'*v_rcm_p1/norm((p_rcm1-p_rcm_origin1))/norm(v_rcm_p1));
+                        record_norm_tube_diff(i_record)=norm_tube_diff1;
                         
                         % cal new RCM position parameter on tube
                         tube_para1=denso_cal_moved_rcmpoint_for_dexerity_verify(mov1_p_o0,q_c1,tube_para1,p_rcm_origin1);
@@ -382,9 +382,6 @@ title('record error p1')
 figure
 plot(1:i_record,record_error_r1)
 title('record error r1')
-figure
-plot(1:i_record,record_v_pp_direc)
-title('record v pp direc')
 %% make movie
 % vobj=VideoWriter('testavi10','Uncompressed AVI'); %Ä¬ÈÏÖ¡ÂÊÊÇ30fps
 % vobj=VideoWriter('two_circle_trocar_20170602','MPEG-4');
