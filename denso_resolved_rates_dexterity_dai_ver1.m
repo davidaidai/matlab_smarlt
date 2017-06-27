@@ -17,7 +17,7 @@ v_lim_low=0.5;
 w_lim_low=0.05;
 v_rcm_p_lim=1;
 sphere_r=190; % Ä£Äâ¸¹Ç»ÕÖ×Ó°ë¾¶
-steplimit=3000000;
+steplimit=300000;
 badcount_std=1e4;
 gamma_record=zeros(8,25,25,25);
 i=0;j=0;k=1;
@@ -27,11 +27,11 @@ p_0_rcm=[0;0;190];
 R_0_rcm=rotx(180/180*pi);
 p_0_wristcenter=[0;0;1000];
 s_tube1=400;
-% record_gamma_degree=zeros(4,1e5,1e2);
-% record_gamma_q_c1=zeros(8,1e5,1e2);
-% record_gamma_tube_para1=zeros(5,1e5,1e2);
-% record_gamma_p_t1=zeros(3,1e5,1e2);
-% record_gamma_R_t1=zeros(3,3,1e5,1e2);
+record_gamma_degree=zeros(4,1e4,50);
+record_gamma_q_c1=zeros(8,1e4,50);
+record_gamma_tube_para1=zeros(5,1e4,50);
+record_gamma_p_t1=zeros(3,1e4,50);
+record_gamma_R_t1=zeros(3,3,1e4,50);
 %%%%%%%%%%%%%
 
 % cube motion
@@ -49,7 +49,7 @@ cube_plot=p_cube;
 
 
 %define double circular tube
-for s_tube_fir1=0:50:350
+for s_tube_fir1=0:100:300
     for tube_theta_fir1=-30/180*pi:15/180*pi:30/180*pi
         i_gamma_total=0;
         i_gamma=0;
@@ -101,16 +101,10 @@ for s_tube_fir1=0:50:350
         for vertex_m=1:(size(p_cube,2))
             p_norm_t1=p_cube(:,vertex_m);
             p_t1=p_norm_t1;
-            for beta=0:15/180*pi:(pi-15/180*pi)
-                for alpha=0:15/180*pi:2*pi
-                    if alpha==2*pi
-                        break;
-                    end
-                    for gamma=0:15/180*pi:2*pi
+            for beta=0:30/180*pi:(pi-30/180*pi)
+                for alpha=0:30/180*pi:(2*pi-30/180*pi)
+                    for gamma=0:30/180*pi:(2*pi-30/180*pi)
                         display(num2str([s_tube_fir1,tube_theta_fir1/pi*180,vertex_m,beta/pi*180,alpha/pi*180,gamma/pi*180]))
-                        if gamma==2*pi
-                            break;
-                        end
                         i_gamma_total=i_gamma_total+1;
                         i_ran=0;
                         targetreach_sign=0;
@@ -118,7 +112,7 @@ for s_tube_fir1=0:50:350
                         R_norm_t1=rotx(alpha)*roty(beta)*rotz(gamma);
                         R_t1=R_norm_t1;
                         
-                        while i_ran~=20
+                        while i_ran~=10
                             if targetreach_sign==1
                                 i_gamma=i_gamma+1;
                                 record_gamma_degree(:,i_gamma,i_tube)=[beta/pi*180;gamma/pi*180;alpha/pi*180;vertex_m];
@@ -126,7 +120,7 @@ for s_tube_fir1=0:50:350
                                 record_gamma_tube_para1(:,i_gamma,i_tube)=tube_para1';
                                 record_gamma_p_t1(:,i_gamma,i_tube)=p_t1;
                                 record_gamma_R_t1(:,:,i_gamma,i_tube)=R_t1;
-                                % display('reach!!!!');
+                                display('reach!!!!');
                                 break;
                             end
                             if randtarget_sign==0
@@ -308,9 +302,6 @@ for s_tube_fir1=0:50:350
                                 %                         %%%%%%%
                                 
                                 if badcount==badcount_std || j==steplimit
-                                    if j==steplimit
-                                        error('god!!')
-                                    end
                                     if randtarget_sign==0
                                         randtarget_sign=1;
                                         break;
