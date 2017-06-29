@@ -35,10 +35,8 @@ lamda=0.02;%paper中说是0.02
 d_t=0.002;
 error_p_desire=0.2;
 error_r_desire=0.03;
-v_lim=15;
-w_lim=0.6;
-v_lim_low=0.5;
-w_lim_low=0.05;
+v_lim_bound=[100,1];% upper bound and lower bound
+w_lim_bound=[90/180*pi,9/180*pi];
 v_rcm_p_lim=8;
 sphere_r=190; % 模拟腹腔罩子半径
 steplimit=3000000;
@@ -148,11 +146,8 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
                         R_tc1=R_t1*R_c1';% 此时R_tc在世界坐标系下
                         error_r1=acos((R_tc1(1,1)+R_tc1(2,2)+R_tc1(3,3)-1)/2);
                         
-                        if abs(error_r1)<=0.01
-                            r_axis1 = [0;0;0];
-                        else
-                            r_axis1 = [R_tc1(3,2)-R_tc1(2,3);R_tc1(1,3)-R_tc1(3,1);R_tc1(2,1)-R_tc1(1,2)]/(2*sin(error_r1));
-                        end
+                        r_axis1 = [R_tc1(3,2)-R_tc1(2,3);R_tc1(1,3)-R_tc1(3,1);R_tc1(2,1)-R_tc1(1,2)]/(2*sin(error_r1));
+
                         
                         if error_p1<error_p_desire && error_r1<error_r_desire
                             if randtarget_sign==0
@@ -165,13 +160,30 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
                         end
                         j=j+1;
                         
-                        if error_p1<=0.5 && error_r1<=0.05
-                            v1=v_lim_low.*(p_t1 - p_c1)/norm(p_t1 - p_c1);
-                            w1 = w_lim_low*r_axis1;
-                        else
-                            v1=v_lim.*(p_t1 - p_c1)/norm(p_t1 - p_c1);
-                            w1 = w_lim*r_axis1;
+                        
+                        % velocity regulation
+                        if error_p1 >=v_lim_bound(1)
+                            v_lim=v_lim_bound(1);
+                        elseif error_p1 <v_lim_bound(1) && error_p1 > v_lim_bound(2)
+                            v_lim=error_p1;
+                        elseif error_p1 <=v_lim_bound(2) && error_p1> error_p_desire
+                            v_lim=v_lim_bound(2);
+                        elseif error_p1<= error_p_desire
+                             v_lim=error_p1;
                         end
+                        if error_r1 >=w_lim_bound(1)
+                            w_lim=w_lim_bound(1);
+                        elseif error_r1 <w_lim_bound(1) && error_r1 > w_lim_bound(2)
+                            w_lim=error_r1;
+                        elseif error_r1 <=w_lim_bound(2) && error_r1> error_r_desire
+                            w_lim=w_lim_bound(2);
+                        elseif error_r1<= error_r_desire
+                             w_lim=error_r1;
+                        end
+                        
+                        v1=v_lim.*(p_t1 - p_c1)/norm(p_t1 - p_c1);
+                        w1 = w_lim*r_axis1;
+                        
                         x_dot1= [v1;w1];
                         
                         J_rt1=J_grip1*(eye(8)-pinv(J_rcm_p1)*J_rcm_p1);
@@ -192,13 +204,13 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
                         record_R_t1(:,:,i_record)=R_t1;
                         record_error_p1(:,i_record)=error_p1;
                         record_error_r1(:,i_record)=error_r1;
-%                         if Srt(6,6)<=eps
-%                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+lamda*eye(6));
-%                             display('denso 1 singularity');
-%                             badcount=badcount+1;
-%                         else
+                        if Srt(6,6)<=eps
+                            J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+lamda*eye(6));
+                            display('denso 1 singularity');
+                            badcount=badcount+1;
+                        else
                             J_rt_plus1=pinv(J_rt1);
-%                         end
+                        end
                         
                         J_total_plus1=(eye(8)-pinv(J_rcm_p1)*J_rcm_p1)*J_rt_plus1;
                         q_dot1=pinv(J_rcm_p1)*v_rcm_p1+J_total_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1);
@@ -362,10 +374,10 @@ plot(1:i_record,record_q_dot1(3,:),'c')
 plot(1:i_record,record_q_dot1(4,:),'y')
 plot(1:i_record,record_q_dot1(5,:),'k')
 plot(1:i_record,record_q_dot1(6,:),'g')
-plot(1:i_record,record_q_dot1(7,:),'+')
+plot(1:i_record,record_q_dot1(7,:),'-.')
 title('record qdot(1:7)')
 figure
-plot(1:i_record,record_q_dot1(8,:),'*')
+plot(1:i_record,record_q_dot1(8,:))
 title('record qdot8')
 figure
 plot(1:i_record,record_norm_tube_diff)
