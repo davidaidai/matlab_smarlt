@@ -1,7 +1,7 @@
 % simiplified denso_continuum control with arbitary circular tube shape to verify dexterity
 % by Zhengchen Dai 20150622
 % initialization method changed: 仅仅定位spherical wrist交叉点的位置
-close
+% close
 clear
 clc
 
@@ -26,18 +26,20 @@ R_0_rcm=rotx(180/180*pi);
 p_0_wristcenter=[0;0;1000];
 [mov1_p_o0,q_c1]=initialize_denso_configuration_with_rcm_target(p_0_wristcenter);
 [q_c1,tube_para1]=rcm_target_resolved_rates(q_c1,mov1_p_o0,p_0_rcm,R_0_rcm,tube_para1);
+% q_c1=[0.257996147920365;-0.421219816288597;2.32527451777906;-0.737040260569900;0.843550990089917;1.43398467015692;1.29090452572762;-1.92487695531541];
+% tube_para1=[266.870575531854;200;200;-0.523598775598299;1.30899693899575];
 q_c1_origin=q_c1;
 tube_para1_origin=tube_para1;
 
 % set simulation parameters
-eps=0.02;%paper中说是0.02
-lamda=0.02;%paper中说是0.02
-d_t=0.002;
+eps=0.04;%paper中说是0.02
+lamda=0.04;%paper中说是0.02
+d_t=1e-3;
 error_p_desire=0.2;
-error_r_desire=0.03;
-v_lim_bound=[100,1];% upper bound and lower bound
-w_lim_bound=[90/180*pi,9/180*pi];
-v_rcm_p_lim=8;
+error_r_desire=1/180*pi;
+v_lim_bound=[50,10];% upper bound and lower bound
+w_lim_bound=[150/180*pi,30/180*pi];
+v_rcm_p_lim=1/d_t;
 sphere_r=190; % 模拟腹腔罩子半径
 steplimit=3000000;
 badcount_std=1e4;
@@ -160,27 +162,75 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
                         end
                         j=j+1;
                         
+%                         if j==30
+%                             jjj=1;
+%                         end
                         
                         % velocity regulation
                         if error_p1 >=v_lim_bound(1)
                             v_lim=v_lim_bound(1);
                         elseif error_p1 <v_lim_bound(1) && error_p1 > v_lim_bound(2)
                             v_lim=error_p1;
-                        elseif error_p1 <=v_lim_bound(2) && error_p1> error_p_desire
+%                         elseif error_p1 <=v_lim_bound(2) && error_p1> error_p_desire
+                        elseif error_p1 <=v_lim_bound(2)
                             v_lim=v_lim_bound(2);
-                        elseif error_p1<= error_p_desire
-                             v_lim=error_p1;
+%                         elseif error_p1<= error_p_desire
+%                              v_lim=error_p1;
                         end
                         if error_r1 >=w_lim_bound(1)
                             w_lim=w_lim_bound(1);
                         elseif error_r1 <w_lim_bound(1) && error_r1 > w_lim_bound(2)
                             w_lim=error_r1;
-                        elseif error_r1 <=w_lim_bound(2) && error_r1> error_r_desire
+%                         elseif error_r1 <=w_lim_bound(2) && error_r1> error_r_desire
+                        elseif error_r1 <=w_lim_bound(2)
                             w_lim=w_lim_bound(2);
-                        elseif error_r1<= error_r_desire
-                             w_lim=error_r1;
+%                         elseif error_r1<= error_r_desire
+%                              w_lim=error_r1;
                         end
                         
+                        if error_p1>=v_lim_bound(1)
+                            tv=(error_p1-v_lim_bound(1))/v_lim_bound(1)+(log(v_lim_bound(1))-log(v_lim_bound(2)))+v_lim_bound(2)/v_lim_bound(2);
+                        elseif error_p1 <v_lim_bound(1) && error_p1 > v_lim_bound(2)
+                            tv=(log(v_lim)-log(v_lim_bound(2)))+v_lim_bound(2)/v_lim_bound(2);
+                        elseif error_p1 <= v_lim_bound(2)
+                            tv=error_p1/v_lim_bound(2);
+                        end
+                        
+                        if error_r1>=w_lim_bound(1)
+                            tw=(error_r1-w_lim_bound(1))/w_lim_bound(1)+(log(w_lim_bound(1))-log(w_lim_bound(2)))+w_lim_bound(2)/w_lim_bound(2);
+                        elseif error_r1 <w_lim_bound(1) && error_r1 > w_lim_bound(2)
+                            tw=(log(w_lim)-log(w_lim_bound(2)))+w_lim_bound(2)/w_lim_bound(2);
+                        elseif error_r1 <= w_lim_bound(2)
+                            tw=error_r1/w_lim_bound(2);
+                        end
+                        
+                        w_lim_c=tw/tv;
+                        v_lim_c=tv/tw;
+                        
+                        w_lim=w_lim_c*w_lim;
+                        if w_lim>= w_lim_bound(1)
+                            w_lim=w_lim_bound(1);
+%                         elseif w_lim<=w_lim_bound(2) && error_r1> error_r_desire && error_p1> error_p_desire
+%                         elseif w_lim<=w_lim_bound(2) && error_r1> error_r_desire
+%                             w_lim=w_lim_bound(2);
+%                         elseif w_lim<=w_lim_bound(2) && error_r1<= error_r_desire
+%                             w_lim=error_r1;
+%                         elseif w_lim<=w_lim_bound(2) && error_p1<= error_p_desire
+%                             w_lim=w_lim_bound(1);
+                        end
+
+%                         v_lim=v_lim_c*v_lim;
+%                         if v_lim>= v_lim_bound(1)
+%                             v_lim=v_lim_bound(1);
+%                         elseif v_lim<=v_lim_bound(2) && error_p1> error_p_desire && error_r1> error_r_desire
+%                         elseif v_lim<=v_lim_bound(2) && error_p1> error_p_desire
+%                             v_lim=v_lim_bound(2);
+%                         elseif v_lim<=v_lim_bound(2) && error_p1<= error_p_desire
+%                             v_lim=error_p1;
+%                         elseif v_lim<=v_lim_bound(2) && error_r1<= error_r_desire
+%                             v_lim=v_lim_bound(1);                        
+%                         end
+                                                
                         v1=v_lim.*(p_t1 - p_c1)/norm(p_t1 - p_c1);
                         w1 = w_lim*r_axis1;
                         
@@ -194,6 +244,8 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
                         [Urt,Srt,Vrt]=svd(J_rt1);
                         [Ugrip,Sgrip,Vgrip]=svd(J_grip1);
                         i_record=i_record+1;
+                        record_v_lim(:,i_record)=v_lim;
+                        record_w_lim(:,i_record)=w_lim;
                         record_Srcm(:,:,i_record)=Srcm;
                         record_Sdenso(:,:,i_record)=Sdenso;
                         record_Sgrip(:,:,i_record)=Sgrip;
@@ -206,6 +258,8 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
                         record_error_r1(:,i_record)=error_r1;
                         if Srt(6,6)<=eps
                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+lamda*eye(6));
+%                             dpl=(1-(Srt(6,6)/eps)^2)*lamda;
+%                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+dpl*eye(6));
                             display('denso 1 singularity');
                             badcount=badcount+1;
                         else
@@ -297,13 +351,14 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
                         
                         tube_diff1=p_rcm_origin1-p_rcm1;
                         v_rcm_p1=v_rcm_p_lim*tube_diff1;
+                        if v_rcm_p1 >= v_lim_bound(1)/2
+                            v_rcm_p1=v_lim_bound(1)/2;
+                        end
                         norm_tube_diff1=norm(tube_diff1);
                         
-%                         if Srt(6,6)<= eps
-%                             record_norm_tube_diff(i_singular)=norm_tube_diff1;
-%                         end
-                            record_norm_tube_diff(i_record)=norm_tube_diff1;
-%                         if j==1249
+                        record_norm_tube_diff(i_record)=norm_tube_diff1;
+                        record_norm_v_rcm_p(i_record)=norm(v_rcm_p1);
+%                         if j==1407
 %                         jjj=1;
 %                         v_rcm_p1=J_rcm_p1*q_dot1;
 %                         rr1=v_rcm_p1'*R_rcm1(:,3);
@@ -329,11 +384,11 @@ beta=-30/180*pi;alpha=90/180*pi;gamma=30/180*pi;
                         
                         %%%%%%%%%%%%%%%%%%%%%%%%
                         
-%                         %%%%%%% draw sentences
-%                         if mod(j,300)==0
+                        %%%%%%% draw sentences
+%                         if mod(j,100)==0
 %                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
 %                         end
-%                         %%%%%%%
+                        %%%%%%%
                         
                         if badcount==badcount_std || j==steplimit
                             if randtarget_sign==0
@@ -381,6 +436,7 @@ plot(1:i_record,record_q_dot1(8,:))
 title('record qdot8')
 figure
 plot(1:i_record,record_norm_tube_diff)
+ylim([0 3]);
 title('record norm tube diff')
 figure
 plot(1:i_record,record_error_p1)
@@ -388,6 +444,16 @@ title('record error p1')
 figure
 plot(1:i_record,record_error_r1)
 title('record error r1')
+figure
+plot(1:i_record,record_v_lim)
+title('record norm v')
+figure
+plot(1:i_record,record_w_lim)
+title('record norm w')
+figure
+plot(1:i_record,record_norm_v_rcm_p)
+title('record norm v rcm p')
+
 %% make movie
 % vobj=VideoWriter('testavi10','Uncompressed AVI'); %默认帧率是30fps
 % vobj=VideoWriter('two_circle_trocar_20170602','MPEG-4');
