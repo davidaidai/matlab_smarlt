@@ -6,6 +6,8 @@ q1=joint_v(1); q2=joint_v(2); q3=joint_v(3); q4=joint_v(4); q5=joint_v(5); q6=jo
 %DENSO-VM60B1?
 d1=475; a1=180; d2=150+96; d3=d2;a2=520; a3=100; d4=590;d6=90;L=40;
 
+eps_theta=0;
+
 x_axis=[1;0;0]; y_axis=[0;1;0]; z_axis=[0;0;1];
 %%%%%%%%%%
 R_0_1=rotz(pi/4)*rotz(q1);
@@ -90,7 +92,7 @@ cos_theta=cos(theta);
 sin_delta=sin(delta);
 cos_delta=cos(delta);
 
-if theta>0
+if theta>eps_theta
     p_t2_c=L/theta*[cos_delta*(1-cos_theta);sin_delta*(cos_theta-1);sin_theta]; %tool根部指向末端的向量
     p_0_c=p_0_o6+p_0_o6t2+R_0_t2*p_t2_c;
 else
@@ -107,7 +109,7 @@ p_c=p_0_g;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Jacobian
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if theta>0.0015
+if theta>eps_theta
     Jcv=R_0_t2*([L*cos_delta*(theta*sin_theta+cos_theta-1)/theta^2,L*sin_delta*(cos_theta-1)/theta;...
         -L*sin_delta*(theta*sin_theta+cos_theta-1)/theta^2,L*cos_delta*(cos_theta-1)/theta;...
         L*(theta*cos_theta-sin_theta)/theta^2,0]...
