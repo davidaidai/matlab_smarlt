@@ -245,11 +245,6 @@ vertex_m=9;
                             record_singular1_p_t1(:,i_singular1)=p_t1;
                             record_singular1_R_t1(:,:,i_singular1)=R_t1;
                             display('Jrt secord order singularity');
-                            %%%%%%% draw sentences
-                            target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
-                            [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
-                            %%%%%%%
-                            saveas(1,['Jrt 2ndorder singular',num2str(i_singular1),'.jpg']);
                         end
                         
                         if Srcm(2,2)<=eps
@@ -260,11 +255,6 @@ vertex_m=9;
                             record_singular2_p_t1(:,i_singular2)=p_t1;
                             record_singular2_R_t1(:,:,i_singular2)=R_t1;
                             display('Jrcm secord order singularity');
-                            %%%%%%% draw sentences
-                            target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
-                            [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
-                            %%%%%%%
-                            saveas(1,['Jrcm 2ndorder singular',num2str(i_singular2),'.jpg']);
                         end
                         
                         if Srt(6,6)<=eps
@@ -381,8 +371,9 @@ q_c1=q_c1+q_dot1*d_t;
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
-                       
-                     %% cal new RCM position parameter on tube
+                        % % % % % % % % % % % % % % % % % % % % % % % % %
+                        
+                        % cal new RCM position parameter on tube
                         tube_para1=denso_cal_moved_rcmpoint_for_dexerity_verify(mov1_p_o0,q_c1,tube_para1,p_rcm_origin1);
                         
                         [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
@@ -394,27 +385,28 @@ q_c1=q_c1+q_dot1*d_t;
                         end
                         norm_tube_diff1=norm(tube_diff1);
                         
-%                         record_norm_tube_diff(i_record)=norm_tube_diff1;
-%                         record_norm_v_rcm_p(i_record)=norm(v_rcm_p1);
+                        record_norm_tube_diff(i_record)=norm_tube_diff1;
+                        record_norm_v_rcm_p(i_record)=norm(v_rcm_p1);
 
                         if norm_tube_diff1>3
                             display('violate RCM point1')
                             i_RCM_violate=i_RCM_violate+1;
-                            %%%%%%% draw sentences
-                            target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
-                            [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
-                            %%%%%%%
-                            saveas(1,['violate RCM',num2str(i_RCM_violate),'.jpg']);
-                            record_violate_degree(:,i_RCM_violate)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;gamma/pi*180;alpha/pi*180];
-                            record_violate_q_c1(:,i_RCM_violate)=q_c1;
-                            record_violate_tube_para1(:,i_RCM_violate)=tube_para1';
-                            record_violate_p_t1(:,i_RCM_violate)=p_t1;
-                            record_violate_R_t1(:,:,i_RCM_violate)=R_t1;
+%                             %%%%%%% draw sentences
+%                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
+%                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
+%                             %%%%%%%
+%                             saveas(1,['violate RCM',num2str(i_RCM_violate),'.jpg']);
+%                             record_violate_q_c1(:,i_RCM_violate)=q_c1;
+%                             record_violate_tube_para1(:,i_RCM_violate)=tube_para1';
+%                             record_violate_p_t1(:,i_RCM_violate)=p_t1;
+%                             record_violate_R_t1(:,:,i_RCM_violate)=R_t1;
                             badcount=badcount_std;
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
                             [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                         end
+                        
+                        %%%%%%%%%%%%%%%%%%%%%%%%
                         
                         %%%%%%% draw sentences
 %                         if mod(j,100)==0
@@ -433,9 +425,9 @@ q_c1=q_c1+q_dot1*d_t;
                         end
                     end
                     
-%                     %%%%%%% draw sentences
-%                     [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
-%                     %%%%%%%
+                    %%%%%%% draw sentences
+                    [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
+                    %%%%%%%
                     
                 end
             end
@@ -447,58 +439,58 @@ q_c1=q_c1+q_dot1*d_t;
     end
 end
 
-% %% plot record parameter
+%% plot record parameter
+figure
+plot_Srt(1:i_record)=record_Srt(6,6,:);
+plot(1:i_record,plot_Srt)
+title('record Srt')
 % figure
-% plot_Srt(1:i_record)=record_Srt(6,6,:);
-% plot(1:i_record,plot_Srt)
-% title('record Srt')
-% % figure
-% % plot_Srcm(1:i_record)=record_Srcm(2,2,:);
-% % plot(1:i_record,plot_Srcm)
-% % title('record Srcm')
+% plot_Srcm(1:i_record)=record_Srcm(2,2,:);
+% plot(1:i_record,plot_Srcm)
+% title('record Srcm')
+figure
+plot(1:i_record,record_q_dot1(1,1:i_record),'r')
+hold on
+plot(1:i_record,record_q_dot1(2,1:i_record),'b')
+plot(1:i_record,record_q_dot1(3,1:i_record),'c')
+plot(1:i_record,record_q_dot1(4,1:i_record),'y')
+% [~,handle_5,handle_7]=plotyy(1:i_record,record_q_dot1(5,1:i_record),1:i_record,record_cq_dot(1,:));
+% [~,handle_6,handle_8]=plotyy(1:i_record,record_q_dot1(6,1:i_record),1:i_record,record_cq_dot(2,:));
+% set(handle_5,'Color','k');
+% set(handle_6,'Color','g');
+% set(handle_7,'LineStyle','-.');
+% set(handle_8,'LineStyle','--');
+plot(1:i_record,record_q_dot1(5,1:i_record),'k')
+plot(1:i_record,record_q_dot1(6,1:i_record),'g')
+plot(1:i_record,record_cq_dot(1,:),'-.')
+plot(1:i_record,record_cq_dot(2,:),'r-.')
+title('record qdot(1:8)')
 % figure
-% plot(1:i_record,record_q_dot1(1,1:i_record),'r')
-% hold on
-% plot(1:i_record,record_q_dot1(2,1:i_record),'b')
-% plot(1:i_record,record_q_dot1(3,1:i_record),'c')
-% plot(1:i_record,record_q_dot1(4,1:i_record),'y')
-% % [~,handle_5,handle_7]=plotyy(1:i_record,record_q_dot1(5,1:i_record),1:i_record,record_cq_dot(1,:));
-% % [~,handle_6,handle_8]=plotyy(1:i_record,record_q_dot1(6,1:i_record),1:i_record,record_cq_dot(2,:));
-% % set(handle_5,'Color','k');
-% % set(handle_6,'Color','g');
-% % set(handle_7,'LineStyle','-.');
-% % set(handle_8,'LineStyle','--');
-% plot(1:i_record,record_q_dot1(5,1:i_record),'k')
-% plot(1:i_record,record_q_dot1(6,1:i_record),'g')
-% plot(1:i_record,record_cq_dot(1,:),'-.')
-% plot(1:i_record,record_cq_dot(2,:),'r-.')
-% title('record qdot(1:8)')
-% % figure
-% % plot(2:i_record,record_q_dot1(8,2:i_record))
-% % title('record qdot8')
-% figure
-% plot(1:i_record,record_norm_tube_diff)
-% ylim([0 3]);
-% title('record norm tube diff')
-% figure
-% plot(1:i_record,record_error_p1)
-% title('record error p1')
-% figure
-% plot(1:i_record,record_error_r1)
-% title('record error r1')
-% figure
-% plot(1:i_record,record_v_lim)
-% title('record norm v')
-% figure
-% plot(1:i_record,record_w_lim)
-% title('record norm w')
-% figure
-% plot(1:i_record,record_norm_v_rcm_p)
-% title('record norm v rcm p')
-% figure
-% plot_Sgrip(1:i_record)=record_Sgrip(6,6,:);
-% plot(1:i_record,plot_Sgrip)
-% title('record Sgrip(6,6)')
+% plot(2:i_record,record_q_dot1(8,2:i_record))
+% title('record qdot8')
+figure
+plot(1:i_record,record_norm_tube_diff)
+ylim([0 3]);
+title('record norm tube diff')
+figure
+plot(1:i_record,record_error_p1)
+title('record error p1')
+figure
+plot(1:i_record,record_error_r1)
+title('record error r1')
+figure
+plot(1:i_record,record_v_lim)
+title('record norm v')
+figure
+plot(1:i_record,record_w_lim)
+title('record norm w')
+figure
+plot(1:i_record,record_norm_v_rcm_p)
+title('record norm v rcm p')
+figure
+plot_Sgrip(1:i_record)=record_Sgrip(6,6,:);
+plot(1:i_record,plot_Sgrip)
+title('record Sgrip(6,6)')
 
 %% make movie
 % vobj=VideoWriter('testavi10','Uncompressed AVI'); %Ä¬ÈÏÖ¡ÂÊÊÇ30fps
