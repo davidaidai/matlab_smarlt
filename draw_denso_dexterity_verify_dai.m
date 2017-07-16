@@ -137,7 +137,10 @@ if strcmp(draw_flag,'draw')
     xlabel('x(mm)')
     ylabel('y(mm)')
     zlabel('z(mm)')
-    zoom(2.5);
+    set(gcf,'Position',get(0,'screensize'));
+    % set(gcf,'color',[1,1,1]);
+    axis tight;
+%     zoom(2.5);
     
 end
 

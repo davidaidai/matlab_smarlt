@@ -1,5 +1,5 @@
 % simiplified denso_continuum control with arbitary circular tube shape to verify dexterity
-% by Zhengchen Dai 20170712
+% by Zhengchen Dai
 close
 clear
 clc
@@ -10,8 +10,8 @@ lamda=0.005;
 d_t=1e-3;
 error_p_desire=0.2;
 error_r_desire=1/180*pi;
-v_lim_bound=[50,10];% upper bound and lower bound
-w_lim_bound=[150/180*pi,30/180*pi];
+v_lim_bound=[50,20];% upper bound and lower bound
+w_lim_bound=[150/180*pi,100/180*pi];
 v_rcm_p_lim=1/d_t;
 sphere_r=190; % 模拟腹腔罩子半径
 steplimit=600000; % 相当于smarlt跑十分钟
@@ -19,11 +19,13 @@ badcount_std=1e4;
 i=0;k=1;
 i_record=0;
 i_RCM_violate=0;
+i_tube=0;
 s_tube1=400;
+tube_theta_whole1=45/180*pi;
 p_0_rcm=[0;0;190];
 R_0_rcm=rotx(180/180*pi);
 p_0_wristcenter=[0;0;1000];
-record_gamma_degree=zeros(4,1e3,50);
+record_gamma_degree=zeros(6,1e3,50);
 record_gamma_q_c1=zeros(8,1e3,50);
 record_gamma_tube_para1=zeros(5,1e3,50);
 record_gamma_p_t1=zeros(3,1e3,50);
@@ -41,12 +43,14 @@ cube_plot=p_cube;
 
 % %% write video
 % mov=0;
-% figure('Position',[466,205,1446,791]);
-% set(gcf,'color',[1,1,1]);
-
+% figure('Position',get(0,'screensize'));
+% % set(gcf,'color',[1,1,1]);
+% % axis equal;
+% axis tight;
 
 %% define double circular tube
-for s_tube_fir1=0:50:350
+for s_tube_fir1=100:50:350
+%     s_tube_fir1=50;
     for tube_theta_fir1=-30/180*pi:15/180*pi:30/180*pi
         i_gamma_total=0;
         i_gamma=0;
@@ -56,7 +60,6 @@ for s_tube_fir1=0:50:350
         i_tube=i_tube+1;
         s_rcm1=s_tube1; % RCM点开始位于tube末端
         s_tube_sec1=s_tube1-s_tube_fir1;
-        tube_theta_whole1=45/180*pi;
         tube_theta_sec1=tube_theta_whole1-tube_theta_fir1;
         tube_para1=[s_rcm1,s_tube_fir1,s_tube_sec1,tube_theta_fir1,tube_theta_sec1];
 
@@ -64,21 +67,16 @@ for s_tube_fir1=0:50:350
 
 [mov1_p_o0,q_c1]=initialize_denso_configuration_with_rcm_target(p_0_wristcenter);
 [q_c1,tube_para1]=rcm_target_resolved_rates(q_c1,mov1_p_o0,p_0_rcm,R_0_rcm,tube_para1);
+q_c1=[0.0813289811105561;0.194764461193291;1.99109029223081;-0.388811394753712;0.773476809438931;2.65144686444801;1.71872460393387;4.66018521416587];
+tube_para1=[191.343314489471;100;300;-0.261799387799149;1.04719755119660];
 q_c1_origin=q_c1;
 tube_para1_origin=tube_para1;
 
-[p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
-p_rcm_origin1=p_0_rcm;
-tube_diff1=p_rcm_origin1-p_rcm1;
-v_rcm_p1=v_rcm_p_lim*tube_diff1;
-if v_rcm_p1 >= v_lim_bound(1)/2
-    v_rcm_p1=v_lim_bound(1)/2;
-end
-
 %% draw sentences
+if i_tube==1
 [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1,tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'draw');
 %% draw RCM point, half sphere, target coordinate
-plot3(p_rcm_origin1(1),p_rcm_origin1(2),p_rcm_origin1(3),'b*','LineWidth',3);
+plot3(p_0_rcm(1),p_0_rcm(2),p_0_rcm(3),'b*','LineWidth',3);
 drawsphere(85/180*pi,pi,sphere_r,[0;0;0]);
 %% draw cube
 plot3(cube_plot(1,:),cube_plot(2,:),cube_plot(3,:),'c','LineWidth',1);
@@ -86,12 +84,23 @@ plot3(cube_plot(1,:),cube_plot(2,:),cube_plot(3,:),'c','LineWidth',1);
 p_t1=p_cube(:,1);
 R_t1=rotx(0);
 target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','draw');
+end
+
+[p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
+p_rcm_origin1=p_0_rcm;
+tube_diff1=p_rcm_origin1-p_rcm1;
+v_rcm_p1=v_rcm_p_lim*tube_diff1;
+v_rcm_p1=v_rcm_p1-(v_rcm_p1'*R_rcm1(:,3))*R_rcm1(:,3);
+if v_rcm_p1 >= v_lim_bound(1)/2
+    v_rcm_p1=v_lim_bound(1)/2;
+end
 
 %% loop continue
 % for vertex_m=1:(size(p_cube,2))
 vertex_m=9;
 
     p_norm_t1=p_cube(:,vertex_m);
+    p_norm_t1=[24.1955077411972;-9.49868855234999;-185.983900045286];
     p_t1=p_norm_t1;
     for beta=0/180*pi:30/180*pi:(pi-30/180*pi)
         for alpha=0:30/180*pi:(2*pi-30/180*pi)
@@ -102,21 +111,24 @@ vertex_m=9;
                 targetreach_sign=0;
                 randtarget_sign=0;
                 R_norm_t1=rotx(alpha)*roty(beta)*rotz(gamma);
+                R_norm_t1=[-0.0752453807169914,0.613575358932692,-0.786042881521978;-0.993993342483134,0.0166692556233244,0.108163630746070;0.0794692882814676,0.789460204714324,0.608635537405149];
+%                 R_norm_t1=rotx(0/180*pi)*roty(0/180*pi)*rotz(330/180*pi);
                 R_t1=R_norm_t1;
                 
 %                 %%%%% draw sentences
 %                 target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
 %                 %%%%%
                 
-                while i_ran~=20
+                while i_ran~=10
                     if targetreach_sign==1
                         i_gamma=i_gamma+1;
-                        record_gamma_degree(:,i_gamma,i_tube)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;gamma/pi*180;alpha/pi*180];
+                        record_gamma_degree(:,i_gamma,i_tube)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;alpha/pi*180;gamma/pi*180];% 20170712的数据中alpha和gamma的位置是对调的
                         record_gamma_q_c1(:,i_gamma,i_tube)=q_c1;
                         record_gamma_tube_para1(:,i_gamma,i_tube)=tube_para1';
                         record_gamma_p_t1(:,i_gamma,i_tube)=p_t1;
                         record_gamma_R_t1(:,:,i_gamma,i_tube)=R_t1;
                         display('reach!!!!');
+                        save (['dexterity 20170716 sfir ',num2str(s_tube_fir1)]);
                         break;
                     end
                     if randtarget_sign==0
@@ -146,6 +158,7 @@ vertex_m=9;
                     badcount=0;
                     
                     while j<steplimit
+                        j=j+1;
                         
                         error_p1=norm(p_t1-p_c1);
                         R_tc1=R_t1*R_c1';% 此时R_tc在世界坐标系下
@@ -163,7 +176,7 @@ vertex_m=9;
                                 break;
                             end
                         end
-                        j=j+1;
+
                         
                      %% velocity regulation
                         if error_p1 >=v_lim_bound(1)
@@ -237,14 +250,14 @@ vertex_m=9;
 %                         record_error_p1(:,i_record)=error_p1;
 %                         record_error_r1(:,i_record)=error_r1;
                         
-                        if Srt(5,5)<=eps
+                        if Srt(5,5)<=0.01
                             i_singular1=i_singular1+1;
-                            record_singular1_degree(:,i_singular1)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;gamma/pi*180;alpha/pi*180];
+                            record_singular1_degree(:,i_singular1)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;alpha/pi*180;gamma/pi*180];
                             record_singular1_q_c1(:,i_singular1)=q_c1;
                             record_singular1_tube_para1(:,i_singular1)=tube_para1';
                             record_singular1_p_t1(:,i_singular1)=p_t1;
                             record_singular1_R_t1(:,:,i_singular1)=R_t1;
-                            display('Jrt secord order singularity');
+%                             display('Jrt secord order singularity');
                             %%%%%%% draw sentences
                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
@@ -252,14 +265,14 @@ vertex_m=9;
                             saveas(1,['Jrt 2ndorder singular',num2str(i_singular1),'.jpg']);
                         end
                         
-                        if Srcm(2,2)<=eps
+                        if Srcm(2,2)<=0.01
                             i_singular2=i_singular2+1;
-                            record_singular2_degree(:,i_singular2)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;gamma/pi*180;alpha/pi*180];
+                            record_singular2_degree(:,i_singular2)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;alpha/pi*180;gamma/pi*180];
                             record_singular2_q_c1(:,i_singular2)=q_c1;
                             record_singular2_tube_para1(:,i_singular2)=tube_para1';
                             record_singular2_p_t1(:,i_singular2)=p_t1;
                             record_singular2_R_t1(:,:,i_singular2)=R_t1;
-                            display('Jrcm secord order singularity');
+%                             display('Jrcm secord order singularity');
                             %%%%%%% draw sentences
                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
@@ -271,12 +284,15 @@ vertex_m=9;
 %                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+lamda*eye(6));
                             dpl=(1-(Srt(6,6)/eps)^2)*lamda;
 %                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+dpl*eye(6));
-                            J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+1e-5*eye(6)+dpl*Urt(:,6)*Urt(:,6)');
-                            display('denso 1 singularity');
+                            J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+0e-5*eye(6)+dpl*Urt(:,6)*Urt(:,6)');
+%                             display('denso 1 singularity');
                         else
                             J_rt_plus1=pinv(J_rt1);
                         end
                         q_dot1=pinv(J_rcm_p1)*v_rcm_p1+J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1);
+                        if norm(q_dot1)>100
+                        jjj=1;
+                        end
                         
 %                         record_q_dot1(:,:,i_record)=q_dot1;
 %                         r=2.5/24*30;
@@ -313,63 +329,87 @@ q_c1=q_c1+q_dot1*d_t;
 
                      %% set joint limits
                         if (q_c1(1)<=-170/180*pi)
-                            display('denso1_joint_1_lowerboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_1_lowerboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(1)>=170/180*pi)
-                            display('denso1_joint_1_upperboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_1_upperboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(2)<=-90/180*pi)
-                            display('denso1_joint_2_lowerboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_2_lowerboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(2)>=135/180*pi)
-                            display('denso1_joint_2_upperboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_2_upperboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(3)<=-80/180*pi)
-                            display('denso1_joint_3_lowerboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_3_lowerboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(3)>=168/180*pi)
-                            display('denso1_joint_3_upperboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_3_upperboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(4)<=-185/180*pi)
-                            display('denso1_joint_4_lowerboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_4_lowerboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(4)>=185/180*pi)
-                            display('denso1_joint_4_upperboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_4_upperboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(5)<=-120/180*pi)
-                            display('denso1_joint_5_lowerboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_5_lowerboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(5)>=120/180*pi)
-                            display('denso1_joint_5_upperboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_5_upperboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(6)<=-2*pi)
-                            display('denso1_joint_6_lowerboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_6_lowerboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(6)>=2*pi)
-                            display('denso1_joint_6_upperboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_6_upperboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(7)<0)
@@ -377,8 +417,10 @@ q_c1=q_c1+q_dot1*d_t;
                             q_c1(8)=q_c1(8)+pi;
                         end
                         if(q_c1(7)>=2*pi/3)
-                            display('denso1_joint_7_upperboundary')
-                            q_c1=q_c1_former;
+%                             display('denso1_joint_7_upperboundary')
+                            q_c1=q_c1_origin;
+                            tube_para1=tube_para1_origin;
+                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                        
@@ -389,6 +431,7 @@ q_c1=q_c1+q_dot1*d_t;
                         
                         tube_diff1=p_rcm_origin1-p_rcm1;
                         v_rcm_p1=v_rcm_p_lim*tube_diff1;
+                        v_rcm_p1=v_rcm_p1-(v_rcm_p1'*R_rcm1(:,3))*R_rcm1(:,3);
                         if norm(v_rcm_p1) >= v_lim_bound(1)/2
                             v_rcm_p1=v_lim_bound(1)/2*v_rcm_p1/norm(v_rcm_p1);
                         end
@@ -398,31 +441,36 @@ q_c1=q_c1+q_dot1*d_t;
 %                         record_norm_v_rcm_p(i_record)=norm(v_rcm_p1);
 
                         if norm_tube_diff1>3
-                            display('violate RCM point1')
+%                             display('violate RCM point1')
+                            if tube_para1(1)~=s_tube1 || 0
                             i_RCM_violate=i_RCM_violate+1;
                             %%%%%%% draw sentences
                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
                             %%%%%%%
                             saveas(1,['violate RCM',num2str(i_RCM_violate),'.jpg']);
-                            record_violate_degree(:,i_RCM_violate)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;gamma/pi*180;alpha/pi*180];
+                            record_violate_degree(:,i_RCM_violate)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;alpha/pi*180;gamma/pi*180];
                             record_violate_q_c1(:,i_RCM_violate)=q_c1;
                             record_violate_tube_para1(:,i_RCM_violate)=tube_para1';
                             record_violate_p_t1(:,i_RCM_violate)=p_t1;
                             record_violate_R_t1(:,:,i_RCM_violate)=R_t1;
+                            end
                             badcount=badcount_std;
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
                             [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                         end
                         
-                        %%%%%%% draw sentences
-%                         if mod(j,100)==0
+                        %%%%% draw sentences
+%                         if mod(j,300)==0
 %                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
 %                         end
-                        %%%%%%%
+                        %%%%%
                         
                         if badcount==badcount_std || j==steplimit
+                            if j==steplimit
+                            jjj=1;
+                            end
                             if randtarget_sign==0
                                 randtarget_sign=1;
                                 break;
@@ -448,10 +496,10 @@ q_c1=q_c1+q_dot1*d_t;
 end
 
 % %% plot record parameter
-% figure
-% plot_Srt(1:i_record)=record_Srt(6,6,:);
-% plot(1:i_record,plot_Srt)
-% title('record Srt')
+figure
+plot_Srt(1:i_record)=record_Srt(6,6,:);
+plot(1:i_record,plot_Srt)
+title('record Srt')
 % % figure
 % % plot_Srcm(1:i_record)=record_Srcm(2,2,:);
 % % plot(1:i_record,plot_Srcm)

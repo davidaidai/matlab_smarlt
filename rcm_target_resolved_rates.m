@@ -72,51 +72,51 @@ while j<steplimit
     %set joint limits
     if (q_c1(1)<=-pi*5/6)
         display('denso1_joint_1_lowerboundary_in_tube_initialization')
-        q_c1(1)=-pi*5/6;
+        j=steplimit;
     end
     if(q_c1(1)>=pi*5/6)
         display('denso1_joint_1_upperboundary_in_tube_initialization')
-        q_c1(1)=pi*5/6;
+        j=steplimit;
     end
     if (q_c1(2)<=-pi/3)
         display('denso1_joint_2_lowerboundary_in_tube_initialization')
-        q_c1(2)=-pi/3;
+        j=steplimit;
     end
     if(q_c1(2)>=3*pi/4)
         display('denso1_joint_2_upperboundary_in_tube_initialization')
-        q_c1(2)=3*pi/4;
+        j=steplimit;
     end
     if (q_c1(3)<=-4*pi/9)
         display('denso1_joint_3_lowerboundary_in_tube_initialization')
-        q_c1(3)=-4*pi/9;
+        j=steplimit;
     end
     if(q_c1(3)>=11*pi/12)
         display('denso1_joint_3_upperboundary_in_tube_initialization')
-        q_c1(3)=11*pi/12;
+        j=steplimit;
     end
     if (q_c1(4)<=-pi)
         display('denso1_joint_4_lowerboundary_in_tube_initialization')
-        q_c1(4)=-pi;
+        j=steplimit;
     end
     if(q_c1(4)>=pi)
         display('denso1_joint_4_upperboundary_in_tube_initialization')
-        q_c1(4)=pi;
+        j=steplimit;
     end
     if (q_c1(5)<=-2*pi/3)
         display('denso1_joint_5_lowerboundary_in_tube_initialization')
-        q_c1(5)=-2*pi/3;
+        j=steplimit;
     end
     if(q_c1(5)>=2*pi/3)
         display('denso1_joint_5_upperboundary_in_tube_initialization')
-        q_c1(5)=2*pi/3;
+        j=steplimit;
     end
     if (q_c1(6)<=-2*pi)
         display('denso1_joint_6_lowerboundary_in_tube_initialization')
-        q_c1(6)=-2*pi;
+        j=steplimit;
     end
     if(q_c1(6)>=2*pi)
         display('denso1_joint_6_upperboundary_in_tube_initialization')
-        q_c1(6)=2*pi;
+        j=steplimit;
     end
     % % % % % % % % % % % % % % % % % % % % % % % % %
     
