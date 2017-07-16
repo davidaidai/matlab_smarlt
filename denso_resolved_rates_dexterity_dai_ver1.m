@@ -52,6 +52,7 @@ singular_sign=0;
 p_rcm_origin1=p_0_rcm;
 tube_diff1=p_rcm_origin1-p_rcm1;
 v_rcm_p1=v_rcm_p_lim*tube_diff1;
+v_rcm_p1=v_rcm_p1-(v_rcm_p1'*R_rcm1(:,3))*R_rcm1(:,3);
 if v_rcm_p1 >= v_lim_bound(1)/2
     v_rcm_p1=v_lim_bound(1)/2;
 end
@@ -370,6 +371,7 @@ q_c1=q_c1+q_dot1*d_t;
                         
                         tube_diff1=p_rcm_origin1-p_rcm1;
                         v_rcm_p1=v_rcm_p_lim*tube_diff1;
+                        v_rcm_p1=v_rcm_p1-(v_rcm_p1'*R_rcm1(:,3))*R_rcm1(:,3);
                         if norm(v_rcm_p1) >= v_lim_bound(1)/2
                             v_rcm_p1=v_lim_bound(1)/2*v_rcm_p1/norm(v_rcm_p1);
                         end
