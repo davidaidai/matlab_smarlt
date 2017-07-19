@@ -20,25 +20,38 @@ tube_theta_fir1=-30/180*pi;
 tube_theta_sec1=tube_theta_whole1-tube_theta_fir1;
 tube_para1=[s_rcm1,s_tube_fir1,s_tube_sec1,tube_theta_fir1,tube_theta_sec1];
 
+
 % define position and orientation of tube end
 p_0_rcm=[0;0;190];
 R_0_rcm=rotx(180/180*pi);
 p_0_wristcenter=[0;0;1000];
 [mov1_p_o0,q_c1]=initialize_denso_configuration_with_rcm_target(p_0_wristcenter);
 [q_c1,tube_para1]=rcm_target_resolved_rates(q_c1,mov1_p_o0,p_0_rcm,R_0_rcm,tube_para1);
-% q_c1=[-0.716236043028513;-0.236164102694094;2.52105526426432;1.36220527433854;1.18075517314056;-0.817985975190416;0.01;1.5];
-% tube_para1=[362.414543160652,200,200,-0.523598775598299,1.30899693899575];
+q_c1=[-0.267487835821091;-0.291763016508031;2.36617491704504;0.840830991165046;0.619847273388196;-0.102665054627708;1.38862509945375;4.90012583513501];
+tube_para1=[194.496438069306,200,200,-0.523598775598299,1.30899693899575];
+q_c1=[-0.191934945203882;-0.139108153197590;2.13491122127880;0.451331291524541;0.797365942840894;0.233169385397012;1.42310529544665;5.14675192272816];
+tube_para1=[173.743319398545;200;200;-0.523598775598299;1.30899693899575];
 q_c1_origin=q_c1;
 tube_para1_origin=tube_para1;
 
 % set simulation parameters
-eps=0.05;
-lamda=0.005;
+for eps=0.03:0.01:0.03
+    for lamda=0.01:0.01:0.01
+%         if lamda==0.045
+%             lamda=0.05;
+%         end
+        q_c1=q_c1_origin;
+        tube_para1=tube_para1_origin;
+        
+% eps=0.05;
+% lamda=0.05;
 d_t=1e-3;
 error_p_desire=0.2;
 error_r_desire=1/180*pi;
-v_lim_bound=[50,10];% upper bound and lower bound
-w_lim_bound=[150/180*pi,30/180*pi];
+v_lim_bound=[50,5];% upper bound and lower bound
+w_lim_bound=[150/180*pi,15/180*pi];
+% v_lim_bound=[50,30];% upper bound and lower bound
+% w_lim_bound=[150/180*pi,20/180*pi];
 v_rcm_p_lim=1/d_t;
 sphere_r=190; % 模拟腹腔罩子半径
 steplimit=3000000;
@@ -70,7 +83,8 @@ l_cube=150;
 p_cube_start=p_0_rcm+[-75;0;-110];
 p_cube1=p_cube_start*ones(1,4)+[0,-l_cube/2,0;l_cube,-l_cube/2,0;l_cube,l_cube/2,0;0,l_cube/2,0]';
 p_cube2=p_cube1+[0;0;-100]*ones(1,4);
-p_cube=[p_cube1,p_cube2];
+p_cube_center=p_0_rcm+[0;0;-110-100/2];
+p_cube=[p_cube1,p_cube2,p_cube_center];
 cube_plot=p_cube;
 
 %%%%%%% draw coordinate
@@ -114,8 +128,8 @@ beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singulari
                 %%%%% draw sentences
                 target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                 %%%%%
-                
-                while i_ran~=1
+
+                while i_ran~=10
 
                     if targetreach_sign==1
 %                         gamma_record(vertex_m,alpha/(15/180*pi)+1,beta/(15/180*pi)+1,gamma/(15/180*pi)+1)=1;
@@ -134,6 +148,7 @@ beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singulari
                         %%%%%%%
                         
                     elseif randtarget_sign==1
+%                         break;
                         sphere_rand_alpha=(rand*2-1)*pi;
                         sphere_rand_beta=(rand*2-1)*pi;
                         sphere_rand_r=rand*sphere_r;
@@ -171,9 +186,9 @@ beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singulari
                         end
                         j=j+1;
                         
-%                         if j==500%4327
-%                             jjj=1;
-%                         end
+                        if j==1701%1731 %4327
+                            jjj=1;
+                        end
                         
                         % velocity regulation
                         if error_p1 >=v_lim_bound(1)
@@ -219,7 +234,11 @@ beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singulari
                         if v_lim>= v_lim_bound(1)
                             v_lim=v_lim_bound(1);
                         end
-                                                
+                        
+
+%                         v_lim=v_lim_bound(2);
+%                         w_lim=w_lim_bound(2);
+                        
                         v1=v_lim.*(p_t1 - p_c1)/norm(p_t1 - p_c1);
                         w1 = w_lim*r_axis1;
                         
@@ -250,20 +269,31 @@ beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singulari
 %                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+lamda*eye(6));
                             dpl=(1-(Srt(6,6)/eps)^2)*lamda;
 %                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+dpl*eye(6));
-                            J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+1e-5*eye(6)+dpl*Urt(:,6)*Urt(:,6)');
+                            J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+0e-5*eye(6)+dpl*Urt(:,6)*Urt(:,6)');
                             display('denso 1 singularity');
                             badcount=badcount+1;
-                            singular_sign=1;
+%                             if randtarget_sign==0
+%                                 jjjj=1;
+%                             end
+%                             if q_c1(7)<1/180*pi
+%                             singular_sign=1;
+%                             end
                         else
                             J_rt_plus1=pinv(J_rt1);
                         end
-                        q_dot1=pinv(J_rcm_p1)*v_rcm_p1+J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1);
+                        q_dot1=pinv(J_rcm_p1)*v_rcm_p1+J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1); % lamda=0.045,x_dot1=[-28.6134176712186;1.02934406064173;-8.95615877355990;-0.135924486853910;-0.301888096678110;-0.110612290782891];q_c1=[-0.108309782710124;-0.162859788686110;2.22678698311016;0.374704496071309;0.567691940585246;0.383379879651784;1.74996978205460;4.92893954002088];
+                        
                         record_q_dot1(:,:,i_record)=q_dot1;
                         r=2.5/24*30;
                         theta=q_c1(7);
                         delta=q_c1(8);
                         J_cq_psi=[-r*cos(delta) r*theta*sin(delta); r*sin(delta) r*theta*cos(delta)];
                         record_cq_dot(:,i_record)=J_cq_psi*q_dot1(7:8);
+                        
+                        q_dot1_1=pinv(J_rcm_p1)*v_rcm_p1;
+                        q_dot1_2=J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1);
+                        record_q_dot1_1(:,:,i_record)=q_dot1_1;
+                        record_q_dot1_2(:,:,i_record)=q_dot1_2;
 %                            record1(:,:,i_record)=J_rt_plus1;
 %                            record2(:,:,i_record)=J_grip1;
 %                            record3(:,i_record)=pinv(J_rcm_p1)*v_rcm_p1;
@@ -430,9 +460,9 @@ q_c1=q_c1+q_dot1*d_t;
 
 %% plot record parameter
 figure
-plot_Srt(1:i_record)=record_Srt(6,6,:);
-plot(1:i_record,plot_Srt)
-title('record Srt')
+plot_Srt(1:i_record)=record_Srt(6,6,1:i_record);
+plot(1:i_record,plot_Srt(1:i_record))
+title(['record Srt eps ',num2str(eps),' lamda ',num2str(lamda)])
 % figure
 % plot_Srcm(1:i_record)=record_Srcm(2,2,:);
 % plot(1:i_record,plot_Srcm)
@@ -451,35 +481,64 @@ plot(1:i_record,record_q_dot1(4,1:i_record),'y')
 % set(handle_8,'LineStyle','--');
 plot(1:i_record,record_q_dot1(5,1:i_record),'k')
 plot(1:i_record,record_q_dot1(6,1:i_record),'g')
-plot(1:i_record,record_cq_dot(1,:),'-.')
-plot(1:i_record,record_cq_dot(2,:),'r-.')
-title('record qdot(1:8)')
+plot(1:i_record,record_cq_dot(1,1:i_record),'-.')
+plot(1:i_record,record_cq_dot(2,1:i_record),'r-.')
+title(['record qdot(1:8) eps ',num2str(eps),' lamda ',num2str(lamda)])
+figure
+plot(1:i_record,record_q_dot1_1(1,1:i_record),'r')
+hold on
+plot(1:i_record,record_q_dot1_1(2,1:i_record),'b')
+plot(1:i_record,record_q_dot1_1(3,1:i_record),'c')
+plot(1:i_record,record_q_dot1_1(4,1:i_record),'y')
+plot(1:i_record,record_q_dot1_1(5,1:i_record),'k')
+plot(1:i_record,record_q_dot1_1(6,1:i_record),'g')
+plot(1:i_record,record_q_dot1_2(1,1:i_record),'r-.')
+plot(1:i_record,record_q_dot1_2(2,1:i_record),'b-.')
+plot(1:i_record,record_q_dot1_2(3,1:i_record),'c-.')
+plot(1:i_record,record_q_dot1_2(4,1:i_record),'y-.')
+plot(1:i_record,record_q_dot1_2(5,1:i_record),'k-.')
+plot(1:i_record,record_q_dot1_2(6,1:i_record),'g-.')
+title(['record qdot(1:8) part1 & part2 eps ',num2str(eps),' lamda ',num2str(lamda)])
+figure
+plot(1:i_record,record_error_p1(1:i_record))
+title(['record error p1 eps ',num2str(eps),' lamda ',num2str(lamda)])
+figure
+plot(1:i_record,record_error_r1(1:i_record))
+title(['record error r1 eps ',num2str(eps),' lamda ',num2str(lamda)])
+figure
+plot(1:i_record,record_norm_v_rcm_p(1:i_record))
+title(['record norm v rcm p eps ',num2str(eps),' lamda ',num2str(lamda)])
+figure
+plot(1:i_record,record_v_lim(1:i_record))
+title(['record norm v eps ',num2str(eps),' lamda ',num2str(lamda)])
+figure
+plot(1:i_record,record_w_lim(1:i_record))
+title(['record norm w eps ',num2str(eps),' lamda ',num2str(lamda)])
+figure
+plot(1:i_record,record_q_c1(1,1:i_record),'r')
+hold on
+plot(1:i_record,record_q_c1(2,1:i_record),'b')
+plot(1:i_record,record_q_c1(3,1:i_record),'c')
+plot(1:i_record,record_q_c1(4,1:i_record),'y')
+plot(1:i_record,record_q_c1(5,1:i_record),'k')
+plot(1:i_record,record_q_c1(6,1:i_record),'g')
+plot(1:i_record,record_q_c1(7,1:i_record),'r-.')
+plot(1:i_record,record_q_c1(8,1:i_record),'b-.')
+title(['record q c eps ',num2str(eps),' lamda ',num2str(lamda)])
+    end
+end
+% figure
+% plot(1:i_record,record_norm_tube_diff(1:i_record))
+% ylim([0 3]);
+% title(['record norm tube diff eps ',num2str(eps),' lamda ',num2str(lamda)])
 % figure
 % plot(2:i_record,record_q_dot1(8,2:i_record))
 % title('record qdot8')
-figure
-plot(1:i_record,record_norm_tube_diff)
-ylim([0 3]);
-title('record norm tube diff')
-figure
-plot(1:i_record,record_error_p1)
-title('record error p1')
-figure
-plot(1:i_record,record_error_r1)
-title('record error r1')
-figure
-plot(1:i_record,record_v_lim)
-title('record norm v')
-figure
-plot(1:i_record,record_w_lim)
-title('record norm w')
-figure
-plot(1:i_record,record_norm_v_rcm_p)
-title('record norm v rcm p')
-figure
-plot_Sgrip(1:i_record)=record_Sgrip(6,6,:);
-plot(1:i_record,plot_Sgrip)
-title('record Sgrip(6,6)')
+
+% figure
+% plot_Sgrip(1:i_record)=record_Sgrip(6,6,:);
+% plot(1:i_record,plot_Sgrip)
+% title('record Sgrip(6,6)')
 
 %% make movie
 % vobj=VideoWriter('testavi10','Uncompressed AVI'); %默认帧率是30fps
