@@ -6,14 +6,14 @@ clear
 clc
 
 % write video
-mov=0;
-figure('Position',[466,205,1446,791]);
-set(gcf,'color',[1,1,1]);
+% mov=0;
+% figure('Position',[466,205,1446,791]);
+% set(gcf,'color',[1,1,1]);
 
 %define double circular tube
 s_tube1=400;
 s_rcm1=s_tube1; % RCM点开始位于tube末端
-s_tube_fir1=200;
+s_tube_fir1=100;
 s_tube_sec1=s_tube1-s_tube_fir1;
 tube_theta_whole1=45/180*pi;
 tube_theta_fir1=-30/180*pi;
@@ -27,36 +27,39 @@ R_0_rcm=rotx(180/180*pi);
 p_0_wristcenter=[0;0;1000];
 [mov1_p_o0,q_c1]=initialize_denso_configuration_with_rcm_target(p_0_wristcenter);
 [q_c1,tube_para1]=rcm_target_resolved_rates(q_c1,mov1_p_o0,p_0_rcm,R_0_rcm,tube_para1);
-q_c1=[-0.267487835821091;-0.291763016508031;2.36617491704504;0.840830991165046;0.619847273388196;-0.102665054627708;1.38862509945375;4.90012583513501];
-tube_para1=[194.496438069306,200,200,-0.523598775598299,1.30899693899575];
-q_c1=[-0.191934945203882;-0.139108153197590;2.13491122127880;0.451331291524541;0.797365942840894;0.233169385397012;1.42310529544665;5.14675192272816];
-tube_para1=[173.743319398545;200;200;-0.523598775598299;1.30899693899575];
+% q_c1=[-0.267487835821091;-0.291763016508031;2.36617491704504;0.840830991165046;0.619847273388196;-0.102665054627708;1.38862509945375;4.90012583513501];
+% tube_para1=[194.496438069306,200,200,-0.523598775598299,1.30899693899575];
+% q_c1=[-0.191934945203882;-0.139108153197590;2.13491122127880;0.451331291524541;0.797365942840894;0.233169385397012;1.42310529544665;5.14675192272816];
+% tube_para1=[173.743319398545;200;200;-0.523598775598299;1.30899693899575];
 q_c1_origin=q_c1;
 tube_para1_origin=tube_para1;
 
+i_eps=0;
 % set simulation parameters
-for eps=0.03:0.01:0.03
-    for lamda=0.01:0.01:0.01
+for eps=0.04:-0.01:0.04
+    for lamda=eps:-eps/5:eps/5
+        i_eps=i_eps+1;
+        fprintf([num2str(eps),'    ',num2str(lamda),'\n']);
 %         if lamda==0.045
 %             lamda=0.05;
 %         end
-        q_c1=q_c1_origin;
-        tube_para1=tube_para1_origin;
+    q_c1=q_c1_origin;
+    tube_para1=tube_para1_origin;
         
 % eps=0.05;
 % lamda=0.05;
 d_t=1e-3;
 error_p_desire=0.2;
 error_r_desire=1/180*pi;
-v_lim_bound=[50,5];% upper bound and lower bound
-w_lim_bound=[150/180*pi,15/180*pi];
+v_lim_bound=[20,5];% upper bound and lower bound
+w_lim_bound=[30/180*pi,5/180*pi];
 % v_lim_bound=[50,30];% upper bound and lower bound
 % w_lim_bound=[150/180*pi,20/180*pi];
 v_rcm_p_lim=1/d_t;
 sphere_r=190; % 模拟腹腔罩子半径
 steplimit=3000000;
 badcount_std=1e4;
-gamma_record=zeros(8,25,25,25);
+% gamma_record=zeros(8,25,25,25);
 i=0;j=0;k=1;
 singular_sign=0;
 %%%%%%%%%%%%%
@@ -69,41 +72,62 @@ v_rcm_p1=v_rcm_p1-(v_rcm_p1'*R_rcm1(:,3))*R_rcm1(:,3);
 if v_rcm_p1 >= v_lim_bound(1)/2
     v_rcm_p1=v_lim_bound(1)/2;
 end
-%%%%%%% draw sentences
-[denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1,tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'draw');
-%%%%%%%
+% %%%%%%% draw sentences
+% [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1,tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'draw');
+% %%%%%%%
+% 
+% %%%%%%%% draw RCM point, half sphere, target coordinate
+% plot3(p_rcm_origin1(1),p_rcm_origin1(2),p_rcm_origin1(3),'b*','LineWidth',3);
+% drawsphere(85/180*pi,pi,sphere_r,[0;0;0]);
+% %%%%%%%%
 
-%%%%%%%% draw RCM point, half sphere, target coordinate
-plot3(p_rcm_origin1(1),p_rcm_origin1(2),p_rcm_origin1(3),'b*','LineWidth',3);
-drawsphere(85/180*pi,pi,sphere_r,[0;0;0]);
-%%%%%%%%
-
-% cube motion
-l_cube=150;
-p_cube_start=p_0_rcm+[-75;0;-110];
-p_cube1=p_cube_start*ones(1,4)+[0,-l_cube/2,0;l_cube,-l_cube/2,0;l_cube,l_cube/2,0;0,l_cube/2,0]';
-p_cube2=p_cube1+[0;0;-100]*ones(1,4);
-p_cube_center=p_0_rcm+[0;0;-110-100/2];
-p_cube=[p_cube1,p_cube2,p_cube_center];
-cube_plot=p_cube;
-
-%%%%%%% draw coordinate
-plot3(cube_plot(1,:),cube_plot(2,:),cube_plot(3,:),'c','LineWidth',1);
-%%%%%%%
-
-%%%%%%% draw sentences
-p_t1=p_cube(:,1);
-R_t1=rotx(0);
-target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','draw');
-%%%%%%%
-
-% for vertex_m=1:(size(p_cube,2))
-vertex_m=7;
-    i_record=0;
-    i_singular=0;
-    i_RCM_violate=0;
-    p_norm_t1=p_cube(:,vertex_m);
-    p_t1=p_norm_t1;
+% % cube motion
+% l_cube=150;
+% p_cube_start=p_0_rcm+[-75;0;-110];
+% p_cube1=p_cube_start*ones(1,4)+[0,-l_cube/2,0;l_cube,-l_cube/2,0;l_cube,l_cube/2,0;0,l_cube/2,0]';
+% p_cube2=p_cube1+[0;0;-100]*ones(1,4);
+% p_cube_center=p_0_rcm+[0;0;-110-100/2];
+% p_cube=[p_cube1,p_cube2,p_cube_center];
+% cube_plot=p_cube;
+% 
+% %%%%%%% draw coordinate
+% plot3(cube_plot(1,:),cube_plot(2,:),cube_plot(3,:),'c','LineWidth',1);
+% %%%%%%%
+% 
+% %%%%%%% draw sentences
+% p_t1=p_cube(:,1);
+% R_t1=rotx(0);
+% target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','draw');
+% %%%%%%%
+% 
+% % for vertex_m=1:(size(p_cube,2))
+% vertex_m=7;
+i_ran=1;
+i_record=0;
+i_singular=0;
+i_notsingular=0;
+while i_ran~=1000
+%     i_singular=0;
+%     i_RCM_violate=0;
+%     p_norm_t1=p_cube(:,vertex_m);
+%     p_t1=p_norm_t1;
+    q_c1=q_c1_origin;
+    tube_para1=tube_para1_origin;
+    [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
+    tube_diff1=p_rcm_origin1-p_rcm1;
+    v_rcm_p1=v_rcm_p_lim*tube_diff1;
+    v_rcm_p1=v_rcm_p1-(v_rcm_p1'*R_rcm1(:,3))*R_rcm1(:,3);
+    if v_rcm_p1 >= v_lim_bound(1)/2
+        v_rcm_p1=v_lim_bound(1)/2;
+    end
+    sphere_rand_alpha=(rand*2-1)*pi;
+    sphere_rand_beta=(rand*2-1)*pi;
+    sphere_rand_r=rand*sphere_r;
+    p_t1=[sphere_rand_r*cos(sphere_rand_alpha)*sin(sphere_rand_beta);sphere_rand_r*cos(sphere_rand_alpha)*cos(sphere_rand_beta);sphere_rand_r*sin(sphere_rand_alpha)];
+    R_t1=rotx((rand*2-1)*pi)*roty((rand*2-1)*pi)*rotz((rand*2-1)*pi);
+%     if j>=10 % 防止连续产生的随机目标点均使得关节处于limit，而达不到产生disturbance的效果
+        i_ran=i_ran+1;
+%     end
 %     for beta=0/180*pi:30/180*pi:(pi-30/180*pi)
 %         for alpha=0:30/180*pi:(2*pi-30/180*pi)
 %             for gamma=0:30/180*pi:(2*pi-30/180*pi)
@@ -117,57 +141,57 @@ vertex_m=7;
 % beta=50/180*pi;alpha=140/180*pi;gamma=-50/180*pi;
 % beta=0/180*pi;alpha=270/180*pi;gamma=90/180*pi; % theta=0导致algorithm singularity，vetex 4
 % beta=0/180*pi;alpha=0/180*pi;gamma=90/180*pi; % 其他原因导致algorithm singularity，但无法到达， vetex 7
-beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singularity，可到达，vetex7 
-                i_ran=0;
-                targetreach_sign=0;
-                randtarget_sign=0;
-                R_norm_t1=rotx(alpha)*roty(beta)*rotz(gamma);
-%                 R_norm_t1=rotx(pi/2)*roty(0)*rotz(0);
-                R_t1=R_norm_t1;
-                
-                %%%%% draw sentences
-                target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
+% beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singularity，可到达，vetex7 
+%                 i_ran=0;
+%                 targetreach_sign=0;
+%                 randtarget_sign=0;
+%                 R_norm_t1=rotx(alpha)*roty(beta)*rotz(gamma);
+% %                 R_norm_t1=rotx(pi/2)*roty(0)*rotz(0);
+%                 R_t1=R_norm_t1;
+%                 
+%                 %%%%% draw sentences
+%                 target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                 %%%%%
 
-                while i_ran~=10
-
-                    if targetreach_sign==1
-%                         gamma_record(vertex_m,alpha/(15/180*pi)+1,beta/(15/180*pi)+1,gamma/(15/180*pi)+1)=1;
-                        display('reach!!!!');
-%                         if singular_sign==1
-%                             mmmm=1;
-%                         end
-                        break;
-                    end
-                    if randtarget_sign==0
-                        p_t1=p_norm_t1;
-                        R_t1=R_norm_t1;
-                        
-                        %%%%%%% draw sentences
-                        target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
-                        %%%%%%%
-                        
-                    elseif randtarget_sign==1
+%                 while i_ran~=10
+% 
+%                     if targetreach_sign==1
+% %                         gamma_record(vertex_m,alpha/(15/180*pi)+1,beta/(15/180*pi)+1,gamma/(15/180*pi)+1)=1;
+%                         display('reach!!!!');
+% %                         if singular_sign==1
+% %                             mmmm=1;
+% %                         end
 %                         break;
-                        sphere_rand_alpha=(rand*2-1)*pi;
-                        sphere_rand_beta=(rand*2-1)*pi;
-                        sphere_rand_r=rand*sphere_r;
-                        p_t1=[sphere_rand_r*cos(sphere_rand_alpha)*sin(sphere_rand_beta);sphere_rand_r*cos(sphere_rand_alpha)*cos(sphere_rand_beta);sphere_rand_r*sin(sphere_rand_alpha)];
-                        R_t1=rotx((rand*2-1)*pi)*roty((rand*2-1)*pi)*rotz((rand*2-1)*pi);
-                        if j>=100 % 防止连续产生的随机目标点均使得关节处于limit，而达不到产生disturbance的效果
-                        i_ran=i_ran+1;
-                        end
-                        %%%%%%% draw sentences
-                        target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
-                        %%%%%%%
-                        
-                    end
+%                     end
+%                     if randtarget_sign==0
+%                         p_t1=p_norm_t1;
+%                         R_t1=R_norm_t1;
+%                         
+%                         %%%%%%% draw sentences
+%                         target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
+%                         %%%%%%%
+%                         
+%                     elseif randtarget_sign==1
+% %                         break;
+%                         sphere_rand_alpha=(rand*2-1)*pi;
+%                         sphere_rand_beta=(rand*2-1)*pi;
+%                         sphere_rand_r=rand*sphere_r;
+%                         p_t1=[sphere_rand_r*cos(sphere_rand_alpha)*sin(sphere_rand_beta);sphere_rand_r*cos(sphere_rand_alpha)*cos(sphere_rand_beta);sphere_rand_r*sin(sphere_rand_alpha)];
+%                         R_t1=rotx((rand*2-1)*pi)*roty((rand*2-1)*pi)*rotz((rand*2-1)*pi);
+%                         if j>=100 % 防止连续产生的随机目标点均使得关节处于limit，而达不到产生disturbance的效果
+%                         i_ran=i_ran+1;
+%                         end
+%                         %%%%%%% draw sentences
+%                         target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
+%                         %%%%%%%
+%                         
+%                     end
                     
                     j=0;
                     badcount=0;
                     
                     while j<steplimit
-                        
+                        j=j+1;
                         error_p1=norm(p_t1-p_c1);
                         R_tc1=R_t1*R_c1';% 此时R_tc在世界坐标系下
                         error_r1=acos((R_tc1(1,1)+R_tc1(2,2)+R_tc1(3,3)-1)/2);
@@ -176,19 +200,19 @@ beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singulari
 
                         
                         if error_p1<error_p_desire && error_r1<error_r_desire
-                            if randtarget_sign==0
-                                targetreach_sign=1;
+%                             if randtarget_sign==0
+%                                 targetreach_sign=1;
                                 break;
-                            elseif randtarget_sign==1
-                                randtarget_sign=0;
-                                break;
-                            end
+%                             elseif randtarget_sign==1
+%                                 randtarget_sign=0;
+%                                 break;
+%                             end
                         end
-                        j=j+1;
+
                         
-                        if j==1701%1731 %4327
-                            jjj=1;
-                        end
+%                         if j==1701%1731 %4327
+%                             jjj=1;
+%                         end
                         
                         % velocity regulation
                         if error_p1 >=v_lim_bound(1)
@@ -251,49 +275,67 @@ beta=0/180*pi;alpha=60/180*pi;gamma=30/180*pi; % 其他原因导致algorithm singulari
                         [Udenso,Sdenso,Vdenso] = svd(J_denso1);
                         [Urt,Srt,Vrt]=svd(J_rt1);
                         [Ugrip,Sgrip,Vgrip]=svd(J_grip1);
-                        i_record=i_record+1;
-                        record_v_lim(:,i_record)=v_lim;
-                        record_w_lim(:,i_record)=w_lim;
-                        record_Srcm(:,:,i_record)=Srcm;
-                        record_Sdenso(:,:,i_record)=Sdenso;
-                        record_Sgrip(:,:,i_record)=Sgrip;
-                        record_Srt(:,:,i_record)=Srt;
-                        record_q_c1(:,i_record)=q_c1;
-                        record_tube_para1(:,i_record)=tube_para1';
-                        record_p_t1(:,i_record)=p_t1;
-                        record_R_t1(:,:,i_record)=R_t1;
-                        record_error_p1(:,i_record)=error_p1;
-                        record_error_r1(:,i_record)=error_r1;
+%                         i_record=i_record+1;
+%                         record_v_lim(:,i_record)=v_lim;
+%                         record_w_lim(:,i_record)=w_lim;
+%                         record_Srcm(:,:,i_record)=Srcm;
+%                         record_Sdenso(:,:,i_record)=Sdenso;
+%                         record_Sgrip(:,:,i_record)=Sgrip;
+%                         record_Srt(:,:,i_record)=Srt;
+%                         record_q_c1(:,i_record)=q_c1;
+%                         record_tube_para1(:,i_record)=tube_para1';
+%                         record_p_t1(:,i_record)=p_t1;
+%                         record_R_t1(:,:,i_record)=R_t1;
+%                         record_error_p1(:,i_record)=error_p1;
+%                         record_error_r1(:,i_record)=error_r1;
                         
                         if Srt(6,6)<=eps
 %                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+lamda*eye(6));
                             dpl=(1-(Srt(6,6)/eps)^2)*lamda;
 %                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+dpl*eye(6));
                             J_rt_plus1 = transpose(J_rt1)/(J_rt1*transpose(J_rt1)+0e-5*eye(6)+dpl*Urt(:,6)*Urt(:,6)');
-                            display('denso 1 singularity');
-                            badcount=badcount+1;
+%                             display('denso 1 singularity');
+%                             badcount=badcount+1;
 %                             if randtarget_sign==0
 %                                 jjjj=1;
 %                             end
 %                             if q_c1(7)<1/180*pi
-%                             singular_sign=1;
+                            singular_sign=1;
 %                             end
                         else
                             J_rt_plus1=pinv(J_rt1);
+                            singular_sign=0;
                         end
-                        q_dot1=pinv(J_rcm_p1)*v_rcm_p1+J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1); % lamda=0.045,x_dot1=[-28.6134176712186;1.02934406064173;-8.95615877355990;-0.135924486853910;-0.301888096678110;-0.110612290782891];q_c1=[-0.108309782710124;-0.162859788686110;2.22678698311016;0.374704496071309;0.567691940585246;0.383379879651784;1.74996978205460;4.92893954002088];
+                        q_dot1=pinv(J_rcm_p1)*v_rcm_p1+J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1); 
                         
-                        record_q_dot1(:,:,i_record)=q_dot1;
+%                         record_q_dot1(:,:,i_record)=q_dot1;
                         r=2.5/24*30;
                         theta=q_c1(7);
                         delta=q_c1(8);
                         J_cq_psi=[-r*cos(delta) r*theta*sin(delta); r*sin(delta) r*theta*cos(delta)];
-                        record_cq_dot(:,i_record)=J_cq_psi*q_dot1(7:8);
-                        
-                        q_dot1_1=pinv(J_rcm_p1)*v_rcm_p1;
-                        q_dot1_2=J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1);
-                        record_q_dot1_1(:,:,i_record)=q_dot1_1;
-                        record_q_dot1_2(:,:,i_record)=q_dot1_2;
+                        cq_dot=J_cq_psi*q_dot1(7:8);
+%                         record_cq_dot(:,i_record)=J_cq_psi*q_dot1(7:8);
+                        if max(abs(q_dot1(1:6)))>2*pi || max(abs(cq_dot))>15
+                            i_record=i_record+1;
+                            if singular_sign==1
+                                i_singular=i_singular+1;
+                            elseif singular_sign==0
+                                    i_notsingular=i_notsingular+1;
+                            end
+                            
+                            record_q_cq_dot(:,i_record,i_eps)=[q_dot1(1:6);cq_dot;singular_sign;i_singular;i_notsingular];
+                            fprintf([num2str(i_ran),' maxqdot ',num2str(max(abs(q_dot1(1:6)))),' maxcqdot ',num2str(max(abs(cq_dot))),' singularsign ',num2str(singular_sign),' i_singular ',num2str(i_singular),' i_notsingular ',num2str(i_notsingular),'\n']);
+                            record_q_c1(:,i_record,i_eps)=q_c1;
+                            record_tube_para1(:,i_record,i_eps)=tube_para1';
+                            record_p_t1(:,i_record,i_eps)=p_t1;
+                            record_R_t1(:,:,i_record,i_eps)=R_t1;
+                            record_Srt(:,i_record,i_eps)=[Srt(1,1);Srt(2,2);Srt(3,3);Srt(4,4);Srt(5,5);Srt(6,6)];
+                            break;
+                        end
+%                         q_dot1_1=pinv(J_rcm_p1)*v_rcm_p1;
+%                         q_dot1_2=J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1);
+%                         record_q_dot1_1(:,:,i_record)=q_dot1_1;
+%                         record_q_dot1_2(:,:,i_record)=q_dot1_2;
 %                            record1(:,:,i_record)=J_rt_plus1;
 %                            record2(:,:,i_record)=J_grip1;
 %                            record3(:,i_record)=pinv(J_rcm_p1)*v_rcm_p1;
@@ -324,62 +366,62 @@ q_c1=q_c1+q_dot1*d_t;
                         %%%%%%%%%
                         %set joint limits
                         if (q_c1(1)<=-170/180*pi)
-                            display('denso1_joint_1_lowerboundary')
+%                             display('denso1_joint_1_lowerboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if(q_c1(1)>=170/180*pi)
-                            display('denso1_joint_1_upperboundary')
+%                             display('denso1_joint_1_upperboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if (q_c1(2)<=-90/180*pi)
-                            display('denso1_joint_2_lowerboundary')
+%                             display('denso1_joint_2_lowerboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if(q_c1(2)>=135/180*pi)
-                            display('denso1_joint_2_upperboundary')
+%                             display('denso1_joint_2_upperboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if (q_c1(3)<=-80/180*pi)
-                            display('denso1_joint_3_lowerboundary')
+%                             display('denso1_joint_3_lowerboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if(q_c1(3)>=168/180*pi)
-                            display('denso1_joint_3_upperboundary')
+%                             display('denso1_joint_3_upperboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if (q_c1(4)<=-185/180*pi)
-                            display('denso1_joint_4_lowerboundary')
+%                             display('denso1_joint_4_lowerboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if(q_c1(4)>=185/180*pi)
-                            display('denso1_joint_4_upperboundary')
+%                             display('denso1_joint_4_upperboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if (q_c1(5)<=-120/180*pi)
-                            display('denso1_joint_5_lowerboundary')
+%                             display('denso1_joint_5_lowerboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if(q_c1(5)>=120/180*pi)
-                            display('denso1_joint_5_upperboundary')
+%                             display('denso1_joint_5_upperboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if (q_c1(6)<=-2*pi)
-                            display('denso1_joint_6_lowerboundary')
+%                             display('denso1_joint_6_lowerboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
                         if(q_c1(6)>=2*pi)
-                            display('denso1_joint_6_upperboundary')
+%                             display('denso1_joint_6_upperboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
@@ -388,7 +430,7 @@ q_c1=q_c1+q_dot1*d_t;
                             q_c1(8)=q_c1(8)+pi;
                         end
                         if(q_c1(7)>=2*pi/3)
-                            display('denso1_joint_7_upperboundary')
+%                             display('denso1_joint_7_upperboundary')
                             q_c1=q_c1_former;
                             badcount=badcount_std;
                         end
@@ -407,12 +449,12 @@ q_c1=q_c1+q_dot1*d_t;
                         end
                         norm_tube_diff1=norm(tube_diff1);
                         
-                        record_norm_tube_diff(i_record)=norm_tube_diff1;
-                        record_norm_v_rcm_p(i_record)=norm(v_rcm_p1);
+%                         record_norm_tube_diff(i_record)=norm_tube_diff1;
+%                         record_norm_v_rcm_p(i_record)=norm(v_rcm_p1);
 
                         if norm_tube_diff1>3
-                            display('violate RCM point1')
-                            i_RCM_violate=i_RCM_violate+1;
+%                             display('violate RCM point1')
+%                             i_RCM_violate=i_RCM_violate+1;
 %                             %%%%%%% draw sentences
 %                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
 %                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
@@ -437,18 +479,18 @@ q_c1=q_c1+q_dot1*d_t;
                         %%%%%%%
                         
                         if badcount==badcount_std || j==steplimit
-                            if randtarget_sign==0
-                                randtarget_sign=1;
+%                             if randtarget_sign==0
+%                                 randtarget_sign=1;
                                 break;
-                            elseif randtarget_sign==1
-                                randtarget_sign=0;
-                                break;
-                            end
+%                             elseif randtarget_sign==1
+%                                 randtarget_sign=0;
+%                                 break;
+%                             end
                         end
                     end
                     
                     %%%%%%% draw sentences
-                    [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
+%                     [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
                     %%%%%%%
                     
                 end
@@ -459,72 +501,72 @@ q_c1=q_c1+q_dot1*d_t;
 % end
 
 %% plot record parameter
-figure
-plot_Srt(1:i_record)=record_Srt(6,6,1:i_record);
-plot(1:i_record,plot_Srt(1:i_record))
-title(['record Srt eps ',num2str(eps),' lamda ',num2str(lamda)])
 % figure
-% plot_Srcm(1:i_record)=record_Srcm(2,2,:);
-% plot(1:i_record,plot_Srcm)
-% title('record Srcm')
-figure
-plot(1:i_record,record_q_dot1(1,1:i_record),'r')
-hold on
-plot(1:i_record,record_q_dot1(2,1:i_record),'b')
-plot(1:i_record,record_q_dot1(3,1:i_record),'c')
-plot(1:i_record,record_q_dot1(4,1:i_record),'y')
-% [~,handle_5,handle_7]=plotyy(1:i_record,record_q_dot1(5,1:i_record),1:i_record,record_cq_dot(1,:));
-% [~,handle_6,handle_8]=plotyy(1:i_record,record_q_dot1(6,1:i_record),1:i_record,record_cq_dot(2,:));
-% set(handle_5,'Color','k');
-% set(handle_6,'Color','g');
-% set(handle_7,'LineStyle','-.');
-% set(handle_8,'LineStyle','--');
-plot(1:i_record,record_q_dot1(5,1:i_record),'k')
-plot(1:i_record,record_q_dot1(6,1:i_record),'g')
-plot(1:i_record,record_cq_dot(1,1:i_record),'-.')
-plot(1:i_record,record_cq_dot(2,1:i_record),'r-.')
-title(['record qdot(1:8) eps ',num2str(eps),' lamda ',num2str(lamda)])
-figure
-plot(1:i_record,record_q_dot1_1(1,1:i_record),'r')
-hold on
-plot(1:i_record,record_q_dot1_1(2,1:i_record),'b')
-plot(1:i_record,record_q_dot1_1(3,1:i_record),'c')
-plot(1:i_record,record_q_dot1_1(4,1:i_record),'y')
-plot(1:i_record,record_q_dot1_1(5,1:i_record),'k')
-plot(1:i_record,record_q_dot1_1(6,1:i_record),'g')
-plot(1:i_record,record_q_dot1_2(1,1:i_record),'r-.')
-plot(1:i_record,record_q_dot1_2(2,1:i_record),'b-.')
-plot(1:i_record,record_q_dot1_2(3,1:i_record),'c-.')
-plot(1:i_record,record_q_dot1_2(4,1:i_record),'y-.')
-plot(1:i_record,record_q_dot1_2(5,1:i_record),'k-.')
-plot(1:i_record,record_q_dot1_2(6,1:i_record),'g-.')
-title(['record qdot(1:8) part1 & part2 eps ',num2str(eps),' lamda ',num2str(lamda)])
-figure
-plot(1:i_record,record_error_p1(1:i_record))
-title(['record error p1 eps ',num2str(eps),' lamda ',num2str(lamda)])
-figure
-plot(1:i_record,record_error_r1(1:i_record))
-title(['record error r1 eps ',num2str(eps),' lamda ',num2str(lamda)])
-figure
-plot(1:i_record,record_norm_v_rcm_p(1:i_record))
-title(['record norm v rcm p eps ',num2str(eps),' lamda ',num2str(lamda)])
-figure
-plot(1:i_record,record_v_lim(1:i_record))
-title(['record norm v eps ',num2str(eps),' lamda ',num2str(lamda)])
-figure
-plot(1:i_record,record_w_lim(1:i_record))
-title(['record norm w eps ',num2str(eps),' lamda ',num2str(lamda)])
-figure
-plot(1:i_record,record_q_c1(1,1:i_record),'r')
-hold on
-plot(1:i_record,record_q_c1(2,1:i_record),'b')
-plot(1:i_record,record_q_c1(3,1:i_record),'c')
-plot(1:i_record,record_q_c1(4,1:i_record),'y')
-plot(1:i_record,record_q_c1(5,1:i_record),'k')
-plot(1:i_record,record_q_c1(6,1:i_record),'g')
-plot(1:i_record,record_q_c1(7,1:i_record),'r-.')
-plot(1:i_record,record_q_c1(8,1:i_record),'b-.')
-title(['record q c eps ',num2str(eps),' lamda ',num2str(lamda)])
+% plot_Srt(1:i_record)=record_Srt(6,6,1:i_record);
+% plot(1:i_record,plot_Srt(1:i_record))
+% title(['record Srt eps ',num2str(eps),' lamda ',num2str(lamda)])
+% % figure
+% % plot_Srcm(1:i_record)=record_Srcm(2,2,:);
+% % plot(1:i_record,plot_Srcm)
+% % title('record Srcm')
+% figure
+% plot(1:i_record,record_q_dot1(1,1:i_record),'r')
+% hold on
+% plot(1:i_record,record_q_dot1(2,1:i_record),'b')
+% plot(1:i_record,record_q_dot1(3,1:i_record),'c')
+% plot(1:i_record,record_q_dot1(4,1:i_record),'y')
+% % [~,handle_5,handle_7]=plotyy(1:i_record,record_q_dot1(5,1:i_record),1:i_record,record_cq_dot(1,:));
+% % [~,handle_6,handle_8]=plotyy(1:i_record,record_q_dot1(6,1:i_record),1:i_record,record_cq_dot(2,:));
+% % set(handle_5,'Color','k');
+% % set(handle_6,'Color','g');
+% % set(handle_7,'LineStyle','-.');
+% % set(handle_8,'LineStyle','--');
+% plot(1:i_record,record_q_dot1(5,1:i_record),'k')
+% plot(1:i_record,record_q_dot1(6,1:i_record),'g')
+% plot(1:i_record,record_cq_dot(1,1:i_record),'-.')
+% plot(1:i_record,record_cq_dot(2,1:i_record),'r-.')
+% title(['record qdot(1:8) eps ',num2str(eps),' lamda ',num2str(lamda)])
+% figure
+% plot(1:i_record,record_q_dot1_1(1,1:i_record),'r')
+% hold on
+% plot(1:i_record,record_q_dot1_1(2,1:i_record),'b')
+% plot(1:i_record,record_q_dot1_1(3,1:i_record),'c')
+% plot(1:i_record,record_q_dot1_1(4,1:i_record),'y')
+% plot(1:i_record,record_q_dot1_1(5,1:i_record),'k')
+% plot(1:i_record,record_q_dot1_1(6,1:i_record),'g')
+% plot(1:i_record,record_q_dot1_2(1,1:i_record),'r-.')
+% plot(1:i_record,record_q_dot1_2(2,1:i_record),'b-.')
+% plot(1:i_record,record_q_dot1_2(3,1:i_record),'c-.')
+% plot(1:i_record,record_q_dot1_2(4,1:i_record),'y-.')
+% plot(1:i_record,record_q_dot1_2(5,1:i_record),'k-.')
+% plot(1:i_record,record_q_dot1_2(6,1:i_record),'g-.')
+% title(['record qdot(1:8) part1 & part2 eps ',num2str(eps),' lamda ',num2str(lamda)])
+% figure
+% plot(1:i_record,record_error_p1(1:i_record))
+% title(['record error p1 eps ',num2str(eps),' lamda ',num2str(lamda)])
+% figure
+% plot(1:i_record,record_error_r1(1:i_record))
+% title(['record error r1 eps ',num2str(eps),' lamda ',num2str(lamda)])
+% figure
+% plot(1:i_record,record_norm_v_rcm_p(1:i_record))
+% title(['record norm v rcm p eps ',num2str(eps),' lamda ',num2str(lamda)])
+% figure
+% plot(1:i_record,record_v_lim(1:i_record))
+% title(['record norm v eps ',num2str(eps),' lamda ',num2str(lamda)])
+% figure
+% plot(1:i_record,record_w_lim(1:i_record))
+% title(['record norm w eps ',num2str(eps),' lamda ',num2str(lamda)])
+% figure
+% plot(1:i_record,record_q_c1(1,1:i_record),'r')
+% hold on
+% plot(1:i_record,record_q_c1(2,1:i_record),'b')
+% plot(1:i_record,record_q_c1(3,1:i_record),'c')
+% plot(1:i_record,record_q_c1(4,1:i_record),'y')
+% plot(1:i_record,record_q_c1(5,1:i_record),'k')
+% plot(1:i_record,record_q_c1(6,1:i_record),'g')
+% plot(1:i_record,record_q_c1(7,1:i_record),'r-.')
+% plot(1:i_record,record_q_c1(8,1:i_record),'b-.')
+% title(['record q c eps ',num2str(eps),' lamda ',num2str(lamda)])
     end
 end
 % figure
