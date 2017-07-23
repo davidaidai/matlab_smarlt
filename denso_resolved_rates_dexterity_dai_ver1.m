@@ -6,7 +6,7 @@ clc
 
 %% set simulation parameters
 eps=0.05;
-lamda=0.005;
+lamda=0.05;
 d_t=1e-3;
 error_p_desire=0.2;
 error_r_desire=1/180*pi;
@@ -49,9 +49,9 @@ cube_plot=p_cube;
 % axis tight;
 
 %% define double circular tube
-for s_tube_fir1=100:50:350
+for s_tube_fir1=100:50:100
 %     s_tube_fir1=50;
-    for tube_theta_fir1=-30/180*pi:15/180*pi:30/180*pi
+    for tube_theta_fir1=-30/180*pi:30/180*pi:30/180*pi
         i_gamma_total=0;
         i_gamma=0;
         if s_tube_fir1==0
@@ -67,8 +67,8 @@ for s_tube_fir1=100:50:350
 
 [mov1_p_o0,q_c1]=initialize_denso_configuration_with_rcm_target(p_0_wristcenter);
 [q_c1,tube_para1]=rcm_target_resolved_rates(q_c1,mov1_p_o0,p_0_rcm,R_0_rcm,tube_para1);
-q_c1=[0.0813289811105561;0.194764461193291;1.99109029223081;-0.388811394753712;0.773476809438931;2.65144686444801;1.71872460393387;4.66018521416587];
-tube_para1=[191.343314489471;100;300;-0.261799387799149;1.04719755119660];
+% q_c1=[0.0813289811105561;0.194764461193291;1.99109029223081;-0.388811394753712;0.773476809438931;2.65144686444801;1.71872460393387;4.66018521416587];
+% tube_para1=[191.343314489471;100;300;-0.261799387799149;1.04719755119660];
 q_c1_origin=q_c1;
 tube_para1_origin=tube_para1;
 
@@ -100,18 +100,21 @@ end
 vertex_m=9;
 
     p_norm_t1=p_cube(:,vertex_m);
-    p_norm_t1=[24.1955077411972;-9.49868855234999;-185.983900045286];
+%     p_norm_t1=[24.1955077411972;-9.49868855234999;-185.983900045286];
     p_t1=p_norm_t1;
-    for beta=0/180*pi:30/180*pi:(pi-30/180*pi)
-        for alpha=0:30/180*pi:(2*pi-30/180*pi)
-            for gamma=0:30/180*pi:(2*pi-30/180*pi)
+    for beta=15/180*pi:15/180*pi:(pi-15/180*pi)
+        for alpha=90/180*pi:15/180*pi:(2*pi-15/180*pi)
+            for gamma=0/180*pi:90/180*pi:(2*pi-90/180*pi)
+                if beta~=0/180*pi && (alpha==90/180*pi || alpha==270/180*pi)
+                    break;
+                end
                 display(num2str([s_tube_fir1,tube_theta_fir1/pi*180,vertex_m,beta/pi*180,alpha/pi*180,gamma/pi*180]))
                 i_gamma_total=i_gamma_total+1;
                 i_ran=0;
                 targetreach_sign=0;
                 randtarget_sign=0;
                 R_norm_t1=rotx(alpha)*roty(beta)*rotz(gamma);
-                R_norm_t1=[-0.0752453807169914,0.613575358932692,-0.786042881521978;-0.993993342483134,0.0166692556233244,0.108163630746070;0.0794692882814676,0.789460204714324,0.608635537405149];
+%                 R_norm_t1=[-0.0752453807169914,0.613575358932692,-0.786042881521978;-0.993993342483134,0.0166692556233244,0.108163630746070;0.0794692882814676,0.789460204714324,0.608635537405149];
 %                 R_norm_t1=rotx(0/180*pi)*roty(0/180*pi)*rotz(330/180*pi);
                 R_t1=R_norm_t1;
                 
@@ -119,16 +122,16 @@ vertex_m=9;
 %                 target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
 %                 %%%%%
                 
-                while i_ran~=10
+                while i_ran~=20
                     if targetreach_sign==1
                         i_gamma=i_gamma+1;
-                        record_gamma_degree(:,i_gamma,i_tube)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;alpha/pi*180;gamma/pi*180];% 20170712的数据中alpha和gamma的位置是对调的
+                        record_gamma_degree(:,i_gamma,i_tube)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;alpha/pi*180;gamma/pi*180];
                         record_gamma_q_c1(:,i_gamma,i_tube)=q_c1;
                         record_gamma_tube_para1(:,i_gamma,i_tube)=tube_para1';
                         record_gamma_p_t1(:,i_gamma,i_tube)=p_t1;
                         record_gamma_R_t1(:,:,i_gamma,i_tube)=R_t1;
                         display('reach!!!!');
-                        save (['dexterity 20170716 sfir ',num2str(s_tube_fir1)]);
+                        save (['dexterity 20170723 sfir ',num2str(s_tube_fir1),' beta15-165alpha90-345']);
                         break;
                     end
                     if randtarget_sign==0
@@ -145,7 +148,7 @@ vertex_m=9;
                         sphere_rand_r=rand*sphere_r;
                         p_t1=[sphere_rand_r*cos(sphere_rand_alpha)*sin(sphere_rand_beta);sphere_rand_r*cos(sphere_rand_alpha)*cos(sphere_rand_beta);sphere_rand_r*sin(sphere_rand_alpha)];
                         R_t1=rotx((rand*2-1)*pi)*roty((rand*2-1)*pi)*rotz((rand*2-1)*pi);
-                        if j>=10 % 防止连续产生的随机目标点均使得关节处于limit，而达不到产生disturbance的效果
+                        if j>=100 % 防止连续产生的随机目标点均使得关节处于limit，而达不到产生disturbance的效果
                         i_ran=i_ran+1;
                         end
 %                         %%%%%%% draw sentences
@@ -262,7 +265,7 @@ vertex_m=9;
                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
                             %%%%%%%
-                            saveas(1,['Jrt 2ndorder singular',num2str(i_singular1),'.jpg']);
+                            saveas(1,['20170723Jrt 2ndorder singular',num2str(i_singular1),'.jpg']);
                         end
                         
                         if Srcm(2,2)<=0.01
@@ -277,7 +280,7 @@ vertex_m=9;
                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
                             %%%%%%%
-                            saveas(1,['Jrcm 2ndorder singular',num2str(i_singular2),'.jpg']);
+                            saveas(1,['20170723Jrcm 2ndorder singular',num2str(i_singular2),'.jpg']);
                         end
                         
                         if Srt(6,6)<=eps
@@ -290,10 +293,7 @@ vertex_m=9;
                             J_rt_plus1=pinv(J_rt1);
                         end
                         q_dot1=pinv(J_rcm_p1)*v_rcm_p1+J_rt_plus1*(x_dot1-J_grip1*pinv(J_rcm_p1)*v_rcm_p1);
-                        if norm(q_dot1)>100
-                        jjj=1;
-                        end
-                        
+
 %                         record_q_dot1(:,:,i_record)=q_dot1;
 %                         r=2.5/24*30;
 %                         theta=q_c1(7);
@@ -448,7 +448,7 @@ q_c1=q_c1+q_dot1*d_t;
                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
                             %%%%%%%
-                            saveas(1,['violate RCM',num2str(i_RCM_violate),'.jpg']);
+                            saveas(1,['20170723violate RCM',num2str(i_RCM_violate),'.jpg']);
                             record_violate_degree(:,i_RCM_violate)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;alpha/pi*180;gamma/pi*180];
                             record_violate_q_c1(:,i_RCM_violate)=q_c1;
                             record_violate_tube_para1(:,i_RCM_violate)=tube_para1';
@@ -496,10 +496,10 @@ q_c1=q_c1+q_dot1*d_t;
 end
 
 % %% plot record parameter
-figure
-plot_Srt(1:i_record)=record_Srt(6,6,:);
-plot(1:i_record,plot_Srt)
-title('record Srt')
+% figure
+% plot_Srt(1:i_record)=record_Srt(6,6,:);
+% plot(1:i_record,plot_Srt)
+% title('record Srt')
 % % figure
 % % plot_Srcm(1:i_record)=record_Srcm(2,2,:);
 % % plot(1:i_record,plot_Srcm)

@@ -15,9 +15,9 @@ end
 
 %%
 jj=1;
-for ii=1:483
-    if record_gamma_degree(5,ii,6)~=record_gamma_degree(5,ii+1,6)
-    beta_alpha(1:2,jj)=record_gamma_degree(4:5,ii,6);
+for ii=1:185
+    if record_gamma_degree(5,ii,1)~=record_gamma_degree(5,ii+1,1)
+    beta_alpha(1:2,jj)=record_gamma_degree(4:5,ii,1);
     jj=jj+1;
     end
 end
