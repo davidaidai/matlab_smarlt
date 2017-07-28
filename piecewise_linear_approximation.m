@@ -1,3 +1,5 @@
+clear
+clc
 %% generate Cd
 npts=1000;
 z_axis=[0;0;1];
@@ -26,11 +28,20 @@ p_6_t2=[p_6_t2_fir,p_6_t2_sec];
 Cd=p_6_t2;
 
 %% 
-i=1;m=1;eps=0.1;
+i=1;m=1;eps=1;v=1;
 while i~=size(Cd,2)
-v=findV(i,Cd,eps);
 p(:,m)=Cd(:,v);
+v=findV(i,Cd,eps);
 m=m+1;
 i=v;
 end
+p(:,m)=Cd(:,v);
 
+%% plot
+figure
+axis equal
+hold on
+xlabel('z(mm)');
+ylabel('y(mm)');
+plot(Cd(3,:),Cd(2,:),'g--');
+plot(p(3,:),p(2,:),'b');

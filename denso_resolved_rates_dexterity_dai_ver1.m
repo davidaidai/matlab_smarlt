@@ -49,9 +49,9 @@ cube_plot=p_cube;
 % axis tight;
 
 %% define double circular tube
-for s_tube_fir1=100:50:100
+for s_tube_fir1=0:50:350
 %     s_tube_fir1=50;
-    for tube_theta_fir1=-30/180*pi:30/180*pi:30/180*pi
+    for tube_theta_fir1=-30/180*pi:30/180*pi:0/180*pi
         i_gamma_total=0;
         i_gamma=0;
         if s_tube_fir1==0
@@ -91,8 +91,8 @@ p_rcm_origin1=p_0_rcm;
 tube_diff1=p_rcm_origin1-p_rcm1;
 v_rcm_p1=v_rcm_p_lim*tube_diff1;
 v_rcm_p1=v_rcm_p1-(v_rcm_p1'*R_rcm1(:,3))*R_rcm1(:,3);
-if v_rcm_p1 >= v_lim_bound(1)/2
-    v_rcm_p1=v_lim_bound(1)/2;
+if norm(v_rcm_p1) >= v_lim_bound(1)/2
+    v_rcm_p1=v_lim_bound(1)/2*v_rcm_p1/norm(v_rcm_p1);
 end
 
 %% loop continue
@@ -102,8 +102,8 @@ vertex_m=9;
     p_norm_t1=p_cube(:,vertex_m);
 %     p_norm_t1=[24.1955077411972;-9.49868855234999;-185.983900045286];
     p_t1=p_norm_t1;
-    for beta=15/180*pi:15/180*pi:(pi-15/180*pi)
-        for alpha=90/180*pi:15/180*pi:(2*pi-15/180*pi)
+    for beta=0/180*pi:15/180*pi:(pi-15/180*pi)
+        for alpha=0/180*pi:15/180*pi:(2*pi-15/180*pi)
             for gamma=0/180*pi:90/180*pi:(2*pi-90/180*pi)
                 if beta~=0/180*pi && (alpha==90/180*pi || alpha==270/180*pi)
                     break;
@@ -113,9 +113,8 @@ vertex_m=9;
                 i_ran=0;
                 targetreach_sign=0;
                 randtarget_sign=0;
-                R_norm_t1=rotx(alpha)*roty(beta)*rotz(gamma);
+                R_norm_t1=roty(beta)*rotx(alpha)*rotz(gamma);
 %                 R_norm_t1=[-0.0752453807169914,0.613575358932692,-0.786042881521978;-0.993993342483134,0.0166692556233244,0.108163630746070;0.0794692882814676,0.789460204714324,0.608635537405149];
-%                 R_norm_t1=rotx(0/180*pi)*roty(0/180*pi)*rotz(330/180*pi);
                 R_t1=R_norm_t1;
                 
 %                 %%%%% draw sentences
@@ -131,7 +130,7 @@ vertex_m=9;
                         record_gamma_p_t1(:,i_gamma,i_tube)=p_t1;
                         record_gamma_R_t1(:,:,i_gamma,i_tube)=R_t1;
                         display('reach!!!!');
-                        save (['dexterity 20170723 sfir ',num2str(s_tube_fir1),' beta15-165alpha90-345']);
+                        save (['dexterity 20170728 sfir ',num2str(s_tube_fir1)]);
                         break;
                     end
                     if randtarget_sign==0
@@ -159,7 +158,8 @@ vertex_m=9;
                     
                     j=0;
                     badcount=0;
-                    
+                    q_c_start=q_c1;
+                    tube_para_start=tube_para1;
                     while j<steplimit
                         j=j+1;
                         
@@ -332,84 +332,72 @@ q_c1=q_c1+q_dot1*d_t;
 %                             display('denso1_joint_1_lowerboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(1)>=170/180*pi)
 %                             display('denso1_joint_1_upperboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(2)<=-90/180*pi)
 %                             display('denso1_joint_2_lowerboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(2)>=135/180*pi)
 %                             display('denso1_joint_2_upperboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(3)<=-80/180*pi)
 %                             display('denso1_joint_3_lowerboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(3)>=168/180*pi)
 %                             display('denso1_joint_3_upperboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(4)<=-185/180*pi)
 %                             display('denso1_joint_4_lowerboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(4)>=185/180*pi)
 %                             display('denso1_joint_4_upperboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(5)<=-120/180*pi)
 %                             display('denso1_joint_5_lowerboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(5)>=120/180*pi)
 %                             display('denso1_joint_5_upperboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(6)<=-2*pi)
 %                             display('denso1_joint_6_lowerboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if(q_c1(6)>=2*pi)
 %                             display('denso1_joint_6_upperboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                         if (q_c1(7)<0)
@@ -420,7 +408,6 @@ q_c1=q_c1+q_dot1*d_t;
 %                             display('denso1_joint_7_upperboundary')
                             q_c1=q_c1_origin;
                             tube_para1=tube_para1_origin;
-                            [p_c1,R_c1,p_rcm1,R_rcm1,J_grip1,J_denso1,J_rcm_p1]=denso_kinematics_dexterity_verify_dai(mov1_p_o0,q_c1,tube_para1);
                             badcount=badcount_std;
                         end
                        
@@ -448,12 +435,14 @@ q_c1=q_c1+q_dot1*d_t;
                             target_handle=draw_coordinate_system2(1,30,R_t1,p_t1,'rgb','update',target_handle);
                             [denso_cylinerhandle1, denso_cubehandle1, denso_chandle1, denso_lhandle1, denso_ghandle1, denso_coo_handle1, tubehandle1]=draw_denso_dexterity_verify_dai(1,mov1_p_o0,q_c1,tube_para1,'update',denso_cylinerhandle1,denso_cubehandle1,denso_chandle1,denso_lhandle1,denso_ghandle1,denso_coo_handle1,tubehandle1);
                             %%%%%%%
-                            saveas(1,['20170723violate RCM',num2str(i_RCM_violate),'.jpg']);
+                            saveas(1,['20170728violate RCM',num2str(i_RCM_violate),'.jpg']);
                             record_violate_degree(:,i_RCM_violate)=[s_tube_fir1;tube_theta_fir1;vertex_m;beta/pi*180;alpha/pi*180;gamma/pi*180];
                             record_violate_q_c1(:,i_RCM_violate)=q_c1;
                             record_violate_tube_para1(:,i_RCM_violate)=tube_para1';
                             record_violate_p_t1(:,i_RCM_violate)=p_t1;
                             record_violate_R_t1(:,:,i_RCM_violate)=R_t1;
+                            record_violate_q_c_start(:,i_RCM_violate)=q_c_start;
+                            record_violate_tube_para_start(:,i_RCM_violate)=tube_para_start';
                             end
                             badcount=badcount_std;
                             q_c1=q_c1_origin;
@@ -468,9 +457,6 @@ q_c1=q_c1+q_dot1*d_t;
                         %%%%%
                         
                         if badcount==badcount_std || j==steplimit
-                            if j==steplimit
-                            jjj=1;
-                            end
                             if randtarget_sign==0
                                 randtarget_sign=1;
                                 break;
